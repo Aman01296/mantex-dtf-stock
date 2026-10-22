@@ -185,7 +185,7 @@ input[type=number]{font-family:var(--mono)}
   <div class="top-inner">
     <div class="brand">
       <h1><span class="cmyk" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:var(--k)"></i></span>DTF Stock Room</h1>
-      <span class="row" style="gap:10px"><span class="sub" id="leadNote">Mantex V1 · 22 Oct 2026</span><span class="sub" id="whoami"></span><button class="btn sm" id="signOut" hidden>Sign out</button></span>
+      <span class="sub" id="leadNote">Mantex V1.1 · 22 Oct 2026</span>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
       <button role="tab" data-tab="overview" aria-selected="true">Overview<span id="alertCount"></span></button>
@@ -235,7 +235,7 @@ const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
 const fmtDate = s => s ? parse(s).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'2-digit'}) : '—';
 const money = n => '£' + (Number(n)||0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2});
 const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
-const APP_VERSION = 'Mantex V1', APP_DATE = '22 Oct 2026';
+const APP_VERSION = 'Mantex V1.1', APP_DATE = '22 Oct 2026';
 const PIN_HASH = '2e05c3799292012dd082cea9aadd7a110905141c41e9a12b36b63a32f6c037e9';
 let mgrUntil = 0;
 const mgrOk = () => Date.now() < mgrUntil;
@@ -432,7 +432,7 @@ function renderOverview(all){
       <div class="facts">
         <div><div class="label">In stock</div><div class="v">${s.stock.length}</div></div>
         <div><div class="label">On order</div><div class="v">${s.onOrder}${s.nextArrival?` <span class="hint">due ${fmtDate(s.nextArrival)}</span>`:''}</div></div>
-        <div><div class="label">${p.kind==='roll'?'A roll lasts':'A bottle lasts'}</div><div class="v">${s.avgLife?Math.round(s.avgLife)+' days':'—'}${s.avgLife&&!s.fromHistory?' <span class="hint">est.</span>':''}</div></div>
+        ${(() => { if (p.unit !== 'bag'){ const all = S.units.filter(u=>u.productId===p.id && u.status==='finished' && u.openedDate && u.finishedDate).map(u=>daysBetween(u.openedDate,u.finishedDate)).filter(d=>d>=1); const allAvg = all.length ? Math.round(all.reduce((a,b)=>a+b,0)/all.length) : null; return `<div><div class="label">${p.kind==='roll'?'A roll lasts':'A bottle lasts'}</div><div class="v">${s.avgLife?Math.round(s.avgLife)+' days':'—'}${s.avgLife?' <span class="hint">last '+s.durs.length+'</span>':''}</div><div class="hint">All-time: ${allAvg!=null?allAvg+' days ('+all.length+')':'—'}</div></div>`; } const tm = today().slice(0,7), d = parse(today()), lm = isoDate(new Date(d.getFullYear(), d.getMonth()-1, 1)).slice(0,7); const used = k => S.units.filter(u=>u.productId===p.id && u.status==='finished' && (u.finishedDate||'').startsWith(k)).length; const plural = n => n===1 ? p.unit.replace(/^1L /,'') : p.unit.replace(/^1L /,'') + (p.unit.endsWith('s')?'':'s'); const a = used(tm), b = used(lm); return `<div><div class="label">Used this month</div><div class="v">${a} <span class="hint">${esc(plural(a))}</span></div><div class="hint">Last month: ${b}</div></div>`; })()}
         <div><div class="label">Days of stock left</div><div class="v">${s.coverDays!=null?Math.floor(s.coverDays)+' days':'—'}</div></div>
       </div>
       <div class="card-foot">
