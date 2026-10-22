@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mantex DTF Stock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky header + tab bar; overview is an alert strip then a grid of product "film strips"; other tabs are dense tables. */
+:root{
+  --bg:#f3f4f2; --surface:#ffffff; --surface-2:#eceeeb; --fg:#1b1d1c; --muted:#5f6662; --line:#d6d9d5;
+  --accent:#1f4e79; --accent-fg:#ffffff; --accent-2:#b0701a;
+  --ok:#2f7d4f; --ok-bg:#e3f1e8; --warn:#9a6200; --warn-bg:#fbefd6; --crit:#b3261e; --crit-bg:#fbe3e1;
+  --c:#00a3d9; --m:#d6197e; --y:#e6c200; --k:#26282a; --w:#f7f8f7; --film:#8fa3b0; --moist:#6aa8a0;
+  --display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141716; --surface:#1d2120; --surface-2:#252a28; --fg:#e8ebe9; --muted:#9aa29e; --line:#333937;
+  --accent:#7fb2e0; --accent-fg:#0d1a26; --accent-2:#e3a957;
+  --ok:#6fcf97; --ok-bg:#1c3326; --warn:#f2b84b; --warn-bg:#3a2d12; --crit:#ff8a80; --crit-bg:#3d1c1a;
+  --k:#c9cdd0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141716; --surface:#1d2120; --surface-2:#252a28; --fg:#e8ebe9; --muted:#9aa29e; --line:#333937;
+  --accent:#7fb2e0; --accent-fg:#0d1a26; --accent-2:#e3a957;
+  --ok:#6fcf97; --ok-bg:#1c3326; --warn:#f2b84b; --warn-bg:#3a2d12; --crit:#ff8a80; --crit-bg:#3d1c1a;
+  --k:#c9cdd0; color-scheme:dark}
+html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 0;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;justify-content:space-between}
+h1{font-family:var(--display);font-size:22px;font-weight:700;margin:0;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.cmyk{display:inline-flex;gap:2px}.cmyk i{width:7px;height:18px;border-radius:1px;display:block}
+.sub{color:var(--muted);font-size:12.5px}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{font:500 13.5px var(--body);background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 12px 10px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+nav.tabs button:hover{color:var(--fg)}
+.badge-count{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:var(--crit);color:#fff;font:600 11px/18px var(--body);text-align:center}
+h2{font-family:var(--display);font-size:17px;font-weight:600;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-size:15px;font-weight:600;margin:0}
+.section{display:flex;flex-direction:column;gap:14px;padding-top:22px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button.btn{font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:var(--r);padding:7px 12px;cursor:pointer}
+button.btn:hover{border-color:var(--muted)}
+button.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.btn.danger{color:var(--crit);border-color:var(--crit)}
+button.btn.sm{padding:4px 9px;font-size:12.5px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+/* alerts */
+.alerts{display:flex;flex-direction:column;gap:6px}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r);border-left:4px solid}
+.alert.crit{background:var(--crit-bg);border-color:var(--crit)}
+.alert.warn{background:var(--warn-bg);border-color:var(--warn)}
+.alert.ok{background:var(--ok-bg);border-color:var(--ok)}
+.alert b{font-weight:600}
+.alert .msg{flex:1;min-width:0}
+
+/* product cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 14px 10px}
+.swatch{width:14px;height:30px;border-radius:2px;flex:none}
+.card-head .t{flex:1;min-width:0}
+.card-head .t div:first-child{font-weight:600}
+.pill{font:600 11px var(--body);letter-spacing:.03em;padding:3px 8px;border-radius:10px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+.slots{display:flex;gap:4px;padding:0 14px 12px;flex-wrap:wrap}
+.slot{width:22px;height:30px;border-radius:3px;border:1.5px solid var(--line);position:relative;background:var(--surface-2)}
+.slot.full{border-color:transparent}
+.slot.open{border-style:dashed}
+.slot.order{border-style:dotted;background:transparent}
+.slot.min::after{content:"";position:absolute;left:-3px;right:-3px;bottom:-6px;height:2px;background:var(--muted);opacity:.5}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.facts div{background:var(--surface);padding:8px 14px}
+.facts .v{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
+.card-foot{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card-foot .note{font-size:12.5px;color:var(--muted);flex:1 1 100%}
+
+/* tables */
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.pgrid.rcv .pg-row{grid-template-columns:minmax(0,1fr) 64px 84px 72px 80px}
+@media (max-width:480px){.pgrid.rcv .pg-row{grid-template-columns:minmax(0,1fr) 52px 70px 56px}}
+.prod{display:inline-flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none;box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent)}
+.swatch,.slot.full{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent)}
+.tag{font:600 10.5px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:9px;background:var(--surface-2);color:var(--muted)}
+.tag.next{background:var(--accent);color:var(--accent-fg)}
+.tag.open{background:var(--warn-bg);color:var(--warn)}
+.tag.wo{background:var(--crit-bg);color:var(--crit)}
+.tag.fin{background:var(--surface-2);color:var(--muted)}
+.obox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.obox-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.obox-head > div:first-child{min-width:0;flex:1 1 220px}
+.ocount{display:inline-block;min-width:22px;padding:0 6px;margin-left:4px;border-radius:10px;background:var(--surface-2);color:var(--muted);font:600 12px/20px var(--body);text-align:center}
+.ototal{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ototal .num{font-size:16px}
+.tablewrap.flat{border:0;border-radius:0}
+.oflag{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:6px;font-size:12.5px}
+tr.flagged td{background:var(--crit-bg)}
+tr.flagged td:first-child{box-shadow:inset 3px 0 0 var(--crit)}
+.perbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.perbar select,.perbar input{width:auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.sharebar{height:8px;border-radius:4px;background:var(--surface-2);min-width:120px;overflow:hidden}
+.sharebar i{display:block;height:100%;border-radius:4px;box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--fg) 25%, transparent)}
+.chg{white-space:nowrap}.chg.up{color:var(--warn);font-weight:600}.chg.down{color:var(--ok)}
+tr.pexp{cursor:pointer}tr.pexp:hover td{background:var(--surface-2)}
+tr.pexp:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+[id^="p-"]{scroll-margin-top:120px}
+.expander{display:block;width:100%;margin-top:-15px;padding:8px 12px;font:500 13px var(--body);color:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:0 0 var(--r) var(--r);cursor:pointer;text-align:center}
+.expander:hover{background:var(--surface-2)}
+.tablewrap:has(+ .expander){border-bottom-left-radius:0;border-bottom-right-radius:0}
+.chev{color:var(--muted);font-size:12px}
+tr.drill > td{padding:0 0 0 24px;background:var(--bg)}
+.drillbox{overflow-x:auto;border-left:2px solid var(--accent)}
+.drillbox th{background:transparent}
+.ofilters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 12.5px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:14px;padding:4px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.stat .v{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums}
+.stat .s{font-size:12px;color:var(--muted)}
+.chartbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow-x:auto}
+.chartbox svg text{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(10,14,12,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 12px 24px;overflow-y:auto}
+.modal{background:var(--surface);color:var(--fg);border-radius:10px;width:100%;max-width:640px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 140px}
+.field label{font-size:12px;font-weight:600;color:var(--muted)}
+input,select,textarea{font:14px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:7px 9px;width:100%}
+input[type=number]{font-family:var(--mono)}
+.fields{display:flex;gap:10px;flex-wrap:wrap}
+.lines{display:flex;flex-direction:column;gap:6px}
+.line{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,.8fr) minmax(0,1fr) auto;gap:6px;align-items:center}
+.pgrid{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.pg-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 92px 84px;gap:8px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--line)}
+.pg-row:last-child{border-bottom:0}
+.pg-head{background:var(--surface-2);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pg-row .prod{flex-wrap:wrap;gap:2px 7px;font-size:13px;min-width:0}
+.pg-row .prod .hint{width:100%;padding-left:16px;font-size:11.5px}
+.pg-row input{padding:6px 7px}
+.r{text-align:right}
+@media (max-width:480px){.pg-row{grid-template-columns:minmax(0,1fr) 58px 78px}.pg-row [data-lt],.pg-head span:last-child{display:none}}
+.totals{background:var(--surface-2);border-radius:var(--r);padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}
+.totals .grand{font-weight:600;font-size:15px;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
+.hint{font-size:12.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:20px;font-size:13px;z-index:60}
+.banner{padding:10px 12px;border-radius:var(--r);background:var(--surface-2);color:var(--muted);font-size:13px}
+@media (max-width:560px){
+  .line{grid-template-columns:1fr 1fr;}
+  .line select{grid-column:1/-1}
+  h1{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1><span class="cmyk" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:var(--k)"></i></span>DTF Stock Room</h1>
+      <span class="row" style="gap:10px"><span class="sub" id="leadNote">Mantex V1 · 22 Oct 2026</span><span class="sub" id="whoami"></span><button class="btn sm" id="signOut" hidden>Sign out</button></span>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button role="tab" data-tab="overview" aria-selected="true">Overview<span id="alertCount"></span></button>
+      <button role="tab" data-tab="stock" aria-selected="false">Stock &amp; in use</button>
+      <button role="tab" data-tab="orders" aria-selected="false">Orders &amp; stock</button>
+      <button role="tab" data-tab="usage" aria-selected="false">Usage &amp; costs</button>
+      <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="app">
+  <div class="section"><div class="banner" id="loading">Loading your stock records…</div></div>
+</main>
+<div id="modalRoot"></div>
+<div id="login" class="overlay" style="align-items:center;background:var(--bg)" hidden>
+  <form class="modal" id="loginForm" style="max-width:380px" autocomplete="on">
+    <h2 style="display:flex;align-items:center;gap:10px"><span class="cmyk" aria-hidden="true"><i style="background:var(--c)"></i><i style="background:var(--m)"></i><i style="background:var(--y)"></i><i style="background:var(--k)"></i></span>Mantex DTF Stock</h2>
+    <div class="field"><label for="lgUser">Username</label><input id="lgUser" autocomplete="username" required autofocus></div>
+    <div class="field"><label for="lgPass">Password</label><input id="lgPass" type="password" autocomplete="current-password" required></div>
+    <div id="lgErr" class="alert crit" hidden><div class="msg"></div></div>
+    <button class="btn primary" type="submit" id="lgBtn">Sign in</button>
+    <span class="hint">Accounts are set up by management.</span>
+  </form>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ===== SETTINGS: paste your Supabase details here ===== */
+const SUPABASE_URL = 'https://uxdfimsfkdcbslbczauu.supabase.co';        // e.g. https://abcdefgh.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4ZGZpbXNma2RjYnNsYmN6YXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2NzU2MDUsImV4cCI6MjEwODI1MTYwNX0.EVQAbDDdC4ZUXlT-IWkz0JQifrOPQ8teAPcd6vqTpZY'; // Project Settings > API > anon public (or publishable) key
+const USERNAME_DOMAIN = 'mantex.local';                // usernames are stored as username@this-domain in Supabase
+/* ====================================================== */
+</script>
+<script>
+(() => {
+'use strict';
+// ---------- helpers ----------
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => isoDate(new Date());
+const parse = s => { const [y,m,d] = String(s).split('-').map(Number); return new Date(y, m-1, d); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate()+Math.round(n)); return isoDate(d); };
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
+const fmtDate = s => s ? parse(s).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+const money = n => '£' + (Number(n)||0).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2});
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+const APP_VERSION = 'Mantex V1', APP_DATE = '22 Oct 2026';
+const PIN_HASH = '2e05c3799292012dd082cea9aadd7a110905141c41e9a12b36b63a32f6c037e9';
+let mgrUntil = 0;
+const mgrOk = () => Date.now() < mgrUntil;
+async function checkPin(pin){
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mantex-dtf:' + String(pin).trim()));
+    const hex = [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    if (hex === PIN_HASH){ mgrUntil = Date.now() + 10*60*1000; return true; }
+  } catch(e) {}
+  return false;
+}
+const pinField = (id) => mgrOk() ? '' : `<div class="field" style="flex:0 1 200px"><label for="${id}">Management PIN</label><input id="${id}" type="password" inputmode="numeric" autocomplete="off" placeholder="••••"></div>`;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+const DEFAULT_PRODUCTS = [
+  {id:'roll', name:'DTF film roll', short:'Roll', unit:'roll', kind:'roll', minStock:3, color:'var(--film)', order:1},
+  {id:'moist', name:'DTF moisturiser', short:'Moisturiser', unit:'1L bottle', kind:'bottle', minStock:5, color:'var(--moist)', order:2},
+  {id:'ink-c', name:'Ink · Cyan', short:'Cyan', unit:'1L bottle', kind:'bottle', minStock:2, color:'var(--c)', order:4},
+  {id:'ink-m', name:'Ink · Magenta', short:'Magenta', unit:'1L bottle', kind:'bottle', minStock:2, color:'var(--m)', order:5},
+  {id:'ink-y', name:'Ink · Yellow', short:'Yellow', unit:'1L bottle', kind:'bottle', minStock:2, color:'var(--y)', order:6},
+  {id:'ink-k', name:'Ink · Black', short:'Black', unit:'1L bottle', kind:'bottle', minStock:2, color:'var(--k)', order:7},
+  {id:'ink-w', name:'Ink · White', short:'White', unit:'1L bottle', kind:'bottle', minStock:2, color:'var(--w)', order:3},
+];
+
+// ---------- state ----------
+const S = { products:{}, units:[], orders:[], settings:{leadDays:90, vatRate:20}, tab:'overview', priceOpen:new Set(), orderFilter:{origin:'all', year:'all', q:''}, period:{preset:'year', from:'', to:''}, stockFilter:'active', showAllFin:new Set(), names:{}, namesAsked:new Set(), me:null, userApi:null, usageFilter:'all', ready:false, readOnly:false };
+let db = null;
+try { const t = localStorage.getItem('dtf-tab'); if (t) S.tab = t; } catch(e) {}
+
+const productList = () => {
+  const list = Object.values(S.products);
+  const src = list.length ? list : DEFAULT_PRODUCTS;
+  return src.slice().sort((a,b)=>(a.order||0)-(b.order||0));
+};
+const P = id => S.products[id] || DEFAULT_PRODUCTS.find(p=>p.id===id) || {id, name:id, short:id, color:'var(--muted)', unit:'unit', kind:'bottle', minStock:0};
+const verbs = p => p.kind==='roll' ? {open:'Put on', opened:'Put on', finish:'Finished', inUse:'On printer'} : {open:'Open', opened:'Opened', finish:'Finished', inUse:'Open'};
+
+// ---------- calculations ----------
+function statsFor(p){
+  const lead = num(S.settings.leadDays) || 90;
+  const us = S.units.filter(u=>u.productId===p.id);
+  const stock = us.filter(u=>u.status==='stock').sort((a,b)=>(a.receivedDate||'').localeCompare(b.receivedDate||''));
+  const open = us.filter(u=>u.status==='open').sort((a,b)=>(a.openedDate||'').localeCompare(b.openedDate||''));
+  const fin = us.filter(u=>u.status==='finished' && u.openedDate && u.finishedDate);
+  // same-day open+finish is usually a correction or test entry, so it doesn't count towards how long items last
+  // average of the 5 most recently finished, so it follows current usage
+  const durs = fin.slice().sort((a,b)=>(b.finishedDate||'').localeCompare(a.finishedDate||'')).map(u=>daysBetween(u.openedDate, u.finishedDate)).filter(d=>d>=1).slice(0,5);
+  const avgLife = durs.length ? durs.reduce((a,b)=>a+b,0)/durs.length : null;
+  const fromHistory = durs.length > 0;
+  const rate = avgLife ? 1/avgLife : null; // units per day
+  let openRemaining = 0;
+  open.forEach(u => { openRemaining += rate ? Math.max(0.1, 1 - daysBetween(u.openedDate, today())*rate) : 0.5; });
+  let onOrder = 0, nextArrival = null;
+  S.orders.forEach(o => { const out = outstanding(o, p.id); if (out > 0){ onOrder += out; if (!nextArrival || o.expectedDate < nextArrival) nextArrival = o.expectedDate; }});
+  const have = stock.length + openRemaining;
+  const coverDays = rate ? have / rate : null;
+  const usedInLead = rate ? lead * rate : 0;
+  const shortfall = Math.max(0, Math.ceil(p.minStock + usedInLead - (have + onOrder) - 1e-9));
+  let orderBy = null;
+  if (rate){ const slack = (have + onOrder - p.minStock)/rate - lead; orderBy = addDays(today(), Math.max(0, slack)); }
+  let level = 'ok', headline = 'Stock healthy', detail = '';
+  if (stock.length < p.minStock && onOrder === 0){
+    level = 'crit'; headline = 'Below minimum';
+    detail = `${stock.length} of ${p.minStock} ${p.unit}s in stock and nothing on order. Order ${Math.max(shortfall, p.minStock - stock.length)} now — it takes ${lead} days to arrive.`;
+  } else if (shortfall > 0){
+    level = stock.length < p.minStock ? 'crit' : 'warn';
+    headline = stock.length < p.minStock ? 'Below minimum' : 'Reorder now';
+    detail = `At current usage you'll drop under ${p.minStock} before a new order could arrive. Order ${shortfall} more ${p.unit}${shortfall>1?'s':''}.` + (onOrder ? ` (${onOrder} already on order, due ${fmtDate(nextArrival)}.)` : '');
+  } else if (stock.length < p.minStock && onOrder > 0){
+    level = 'warn'; headline = 'Below min · order coming';
+    detail = `${stock.length} of ${p.minStock} in stock. ${onOrder} on order, due ${fmtDate(nextArrival)}.`;
+  } else if (orderBy && daysBetween(today(), orderBy) <= 21){
+    level = 'warn'; headline = 'Reorder soon';
+    detail = `Place an order by ${fmtDate(orderBy)} to keep ${p.minStock} in stock.`;
+  }
+  if (open.length > 1) {
+    detail += (detail ? ' ' : '') + `${open.length} ${p.unit}s are open at once — finish the oldest first.`;
+    if (level === 'ok'){ level = 'warn'; headline = 'Two open'; }
+  }
+  return {stock, open, fin, durs, avgLife, fromHistory, rate, openRemaining, onOrder, nextArrival, coverDays, shortfall, orderBy, level, headline, detail, have};
+}
+
+const CHARGE_TYPES = {duty:'Import duty', vat:'Import VAT', handling:'Courier handling fee', other:'Other'};
+function orderTotals(o){
+  const goods = (o.lines||[]).reduce((a,l)=>a+num(l.qty)*num(l.unitPrice),0) + num(o.otherGoods);
+  const ch = o.charges||[];
+  const ship = num(o.shipping) + num(o.processing);
+  const fees = num(o.duty) + ch.filter(c=>c.type!=='vat').reduce((a,c)=>a+num(c.amount),0);
+  const vat = num(o.vat) + ch.filter(c=>c.type==='vat').reduce((a,c)=>a+num(c.amount),0);
+  return {goods, ship, duty:fees, vat, exVat: goods+ship+fees, total: goods+ship+fees+vat};
+}
+// Landed cost per item of one product on an order; recalculated live, so import fees added later flow into item costs.
+function landedForProduct(o, pid){
+  const t = orderTotals(o);
+  const ls = (o.lines||[]).filter(l=>l.productId===pid);
+  const q = (ls.reduce((a,l)=>a+num(l.qty),0) - closedQty(o,pid)) || 1;
+  const val = ls.reduce((a,l)=>a+num(l.qty)*num(l.unitPrice),0);
+  const share = t.goods ? val/t.goods : 0;
+  return {exVat:(val + (t.ship+t.duty)*share)/q, vat:(t.vat*share)/q};
+}
+function costOf(u){
+  const o = u.orderId && S.orders.find(x=>x.id===u.orderId);
+  if (o && (o.lines||[]).some(l=>l.productId===u.productId)) return landedForProduct(o, u.productId).exVat;
+  return num(u.costExVat);
+}
+const isChina = o => (o.origin||'china') === 'china';
+const orderedQty = (o,pid) => (o.lines||[]).filter(l=>l.productId===pid).reduce((a,l)=>a+num(l.qty),0);
+const receivedQty = (o,pid) => S.units.filter(u=>u.orderId===o.id && u.productId===pid).length;
+const closedQty = (o,pid) => (o.shortClosed||[]).filter(l=>l.productId===pid).reduce((a,l)=>a+num(l.qty),0);
+const outstanding = (o,pid) => o.status==='received' ? 0 : Math.max(0, orderedQty(o,pid) - receivedQty(o,pid) - closedQty(o,pid));
+const orderPids = o => [...new Set((o.lines||[]).map(l=>l.productId))];
+const outstandingText = o => orderPids(o).map(pid=>[pid, outstanding(o,pid)]).filter(x=>x[1]>0).map(([pid,q])=>`${q}× ${P(pid).short}`).join(', ');
+const lastChase = o => { const c = (o.chases||[]).slice(-1)[0]; return c ? `Last chased ${fmtDate(c.date)} (${daysBetween(c.date,today())}d ago)` : 'Not chased yet'; };
+
+function ageFlags(p){
+  const s = statsFor(p);
+  const shelf = num(p.shelfDays) || 180;
+  const maxOpen = num(p.maxOpenDays) || (s.fromHistory ? Math.max(7, Math.round(s.avgLife*2)) : null);
+  return {shelf, maxOpen,
+    oldStock: s.stock.filter(u => u.receivedDate && daysBetween(u.receivedDate, today()) > shelf),
+    longOpen: maxOpen ? s.open.filter(u => u.openedDate && daysBetween(u.openedDate, today()) > maxOpen) : []};
+}
+
+// ---------- rendering ----------
+function setTab(t){
+  S.tab = t;
+  try { localStorage.setItem('dtf-tab', t); } catch(e) {}
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===t)));
+  render();
+}
+document.querySelectorAll('#tabs button[data-tab]').forEach(b => b.addEventListener('click', ev => { ev.preventDefault(); setTab(b.dataset.tab); }));
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===S.tab)));
+  let all = [];
+  try { all = productList().map(p=>({p, s:statsFor(p)})); } catch(err){ console.error(err); }
+  let nAlerts = all.filter(x=>x.s.level!=='ok').length + S.orders.filter(o=>o.status==='partial').length;
+  try { productList().forEach(p => { const a = ageFlags(p); nAlerts += (a.oldStock.length?1:0) + a.longOpen.length; }); } catch(e) {}
+  $('#alertCount').innerHTML = nAlerts && S.ready ? `<span class="badge-count">${nAlerts}</span>` : '';
+  const app = $('#app');
+  const views = {overview:renderOverview, stock:renderStock, orders:renderOrders, usage:renderUsage, settings:renderSettings};
+  let body;
+  try { body = (views[S.tab]||renderOverview)(all); }
+  catch(err){ console.error(err); body = `<div class="section"><div class="alert crit"><div class="msg"><b>This tab couldn't be shown.</b> ${esc(err && err.message || err)}. Other tabs still work.</div></div></div>`; }
+  app.innerHTML = (S.notice ? `<div class="section"><div class="banner">${S.notice}</div></div>` : '')
+    + (!S.ready ? `<div class="section"><div class="banner">Loading your stock records…</div></div>` : '')
+    + (S.readOnly && db ? `<div class="section"><div class="banner">You can view this tracker but not change it. Ask the owner for Contributor access to log stock.</div></div>` : '') + body;
+}
+
+function slotsHtml(p, s){
+  const out = [];
+  const total = Math.max(p.minStock, s.stock.length) ;
+  for (let i=0;i<s.open.length;i++) out.push(`<span class="slot full open" title="${esc(verbs(p).inUse)}" style="background:color-mix(in srgb, ${p.color} 45%, transparent);border-color:${p.color}"></span>`);
+  for (let i=0;i<total;i++){
+    const full = i < s.stock.length;
+    const isMin = i === p.minStock-1;
+    out.push(`<span class="slot ${full?'full':''} ${isMin?'min':''}" ${full?`style="background:${p.color}"`:''} title="${full?'In stock':'Empty slot'}"></span>`);
+  }
+  for (let i=0;i<Math.min(s.onOrder,12);i++) out.push(`<span class="slot order" style="border-color:${p.color}" title="On order"></span>`);
+  return out.join('');
+}
+
+function renderOverview(all){
+  const alerts = all.filter(x=>x.s.level!=='ok').sort((a,b)=>(a.s.level==='crit'?0:1)-(b.s.level==='crit'?0:1));
+  const anyUnits = S.units.length > 0;
+  let h = `<div class="section">`;
+  h += `<div class="row spread"><h2>Alerts</h2></div>`;
+  if (!anyUnits && S.ready) h += `<div class="banner">No stock yet. All stock comes in through <b>Orders &amp; stock</b>: log the order, then <b>Receive</b> it, so every roll and bottle carries its cost. For stock already on the shelf, log the order it came from with its original order date and costs, then receive it with the date marked on the items. To record a bottle or roll that's already in use, use <b>Open</b> or <b>Put on</b> on its card and change the date.</div>`;
+  h += `<div class="alerts">`;
+  if (!alerts.length && !S.orders.some(o=>o.status==='partial') && !productList().some(p=>{const a=ageFlags(p); return a.oldStock.length||a.longOpen.length;})) h += `<div class="alert ok"><div class="msg"><b>All stock levels OK.</b> Nothing needs ordering within the ${num(S.settings.leadDays)||90}-day lead time.</div></div>`;
+  alerts.forEach(({p,s}) => {
+    h += `<div class="alert ${s.level}"><span class="dot" style="background:${p.color};margin-top:5px"></span><div class="msg"><b>${esc(p.name)} — ${esc(s.headline)}.</b> ${esc(s.detail)}</div></div>`;
+  });
+  productList().forEach(p => { const a = ageFlags(p), v = verbs(p);
+    if (a.oldStock.length) h += `<div class="alert warn"><span class="dot" style="background:${p.color};margin-top:5px"></span><div class="msg"><b>${esc(p.name)}: old stock.</b> ${a.oldStock.length} unopened ${esc(p.unit)}${a.oldStock.length>1?'s are':' is'} dated more than ${a.shelf} days ago (oldest ${fmtDate(a.oldStock[0].receivedDate)}). Use soon, or check it's still good.</div></div>`;
+    a.longOpen.forEach(u => { h += `<div class="alert warn"><span class="dot" style="background:${p.color};margin-top:5px"></span><div class="msg"><b>${esc(p.name)}: ${esc(v.inUse.toLowerCase())} for ${daysBetween(u.openedDate, today())} days.</b> Longer than the ${a.maxOpen}-day limit. Check it's still usable, or mark it finished.</div></div>`; });
+  });
+  S.orders.filter(o=>o.status==='partial').forEach(o => {
+    h += `<div class="alert crit"><span class="dot" style="background:var(--crit);margin-top:5px"></span><div class="msg"><b>Part delivery to chase: ${esc(o.supplier||'Order')}${o.orderNo?' #'+esc(o.orderNo):''}.</b> Still waiting for ${esc(outstandingText(o))} (first part arrived ${fmtDate(o.firstReceivedDate||o.receivedDate)}). ${esc(lastChase(o))}.</div></div>`;
+  });
+  const waiting = S.orders.filter(o=>isChina(o) && o.feesPending);
+  if (waiting.length) h += `<div class="alert warn"><span class="dot" style="background:var(--warn);margin-top:5px"></span><div class="msg"><b>Import fees still to come on ${waiting.length} China order${waiting.length>1?'s':''}.</b> ${waiting.map(o=>esc(o.supplier||'Order')+' ('+fmtDate(o.orderDate)+')').join(', ')}. Add duty and import VAT on the Orders tab when the bill arrives.</div></div>`;
+  h += `</div></div>`;
+
+  h += `<div class="section"><div class="row spread"><h2>Supplies</h2></div><div class="grid">`;
+  all.forEach(({p,s}) => {
+    const v = verbs(p);
+    const next = s.stock[0];
+    const cur = s.open[0];
+    h += `<article class="card">
+      <div class="card-head"><span class="swatch" style="background:${p.color}"></span>
+        <div class="t"><div>${esc(p.name)}</div><div class="hint">Keep ${p.minStock} × ${esc(p.unit)} in stock</div></div>
+        <span class="pill ${s.level}">${esc(s.level==='ok'?'OK':s.headline)}</span></div>
+      <div class="facts">
+        <div><div class="label">In stock</div><div class="v">${s.stock.length}</div></div>
+        <div><div class="label">On order</div><div class="v">${s.onOrder}${s.nextArrival?` <span class="hint">due ${fmtDate(s.nextArrival)}</span>`:''}</div></div>
+        <div><div class="label">${p.kind==='roll'?'A roll lasts':'A bottle lasts'}</div><div class="v">${s.avgLife?Math.round(s.avgLife)+' days':'—'}${s.avgLife&&!s.fromHistory?' <span class="hint">est.</span>':''}</div></div>
+        <div><div class="label">Days of stock left</div><div class="v">${s.coverDays!=null?Math.floor(s.coverDays)+' days':'—'}</div></div>
+      </div>
+      <div class="card-foot">
+        <div class="note">${cur?`${esc(v.inUse)} since ${fmtDate(cur.openedDate)} (${daysBetween(cur.openedDate,today())} days).`:`Nothing ${p.kind==='roll'?'on the printer':'open'}.`} ${next?`Next to use: dated <b>${fmtDate(next.receivedDate)}</b>.`:'No stock left.'}${s.orderBy && s.level==='ok'?` Order by ${fmtDate(s.orderBy)}.`:''}</div>
+        ${S.readOnly?'':`${cur?`<button class="btn sm" data-act="finish" data-id="${cur.id}">Mark ${esc(v.finish.toLowerCase())}</button>`:''}
+        ${next && !cur ?`<button class="btn sm primary" data-act="open" data-id="${next.id}">${esc(v.open)} next</button>`:''}`}
+      </div></article>`;
+  });
+  h += `</div></div>`;
+  return h;
+}
+
+function renderStock(){
+  const f = S.stockFilter;
+  const prods = productList();
+  const fromOrder = u => { const o = u.orderId && S.orders.find(x=>x.id===u.orderId); return o ? `${o.orderNo?'#'+esc(o.orderNo):esc(o.supplier||'Order')}<div class="hint">${isChina(o)?'China':'UK'} · ${fmtDate(o.orderDate)}</div>` : '<span class="hint">No order</span>'; };
+  let h = `<div class="section"><div class="row spread"><h2>Stock &amp; in use</h2>${S.readOnly?'':`<button class="btn" data-act="goOrders">Receive stock in Orders &amp; stock</button>`}</div>
+  <p class="hint" style="margin:0">Stock is only added by receiving an order, so every item has a cost. Sorted oldest first by the date marked on each item. <b>Next</b> is the one to use next. Only one of each product can be in use: put it on, then mark it finished. Faulty items are written off by management.</p>`;
+
+  h += `<div class="filters">${[['active','In stock & open'],['finished','Finished'],['writtenoff','Written off'],['all','All']].map(([k,v])=>`<button class="chip" data-filter="${k}" aria-pressed="${f===k}">${v}</button>`).join('')}</div>`;
+
+  prods.forEach(p => {
+    const s = statsFor(p), a = ageFlags(p), v = verbs(p);
+    let rows = [];
+    if (f==='all' || f==='active') rows.push(...s.open, ...s.stock);
+    if (f==='all' || f==='finished') rows.push(...S.units.filter(u=>u.productId===p.id && u.status==='finished').sort((a,b)=>(b.finishedDate||'').localeCompare(a.finishedDate||'')));
+    if (f==='all' || f==='writtenoff') rows.push(...S.units.filter(u=>u.productId===p.id && u.status==='writtenoff').sort((a,b)=>(b.writtenOffDate||'').localeCompare(a.writtenOffDate||'')));
+    h += `<div class="row spread" style="margin-top:6px" id="p-${p.id}"><h3 class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</h3><span class="hint">${s.stock.length} in stock · ${s.open.length} ${esc(v.inUse.toLowerCase())}</span></div>`;
+    if (!rows.length){ h += `<div class="tablewrap"><div class="empty">${f==='active'?'Nothing in stock or in use.':'Nothing here.'}</div></div>`; return; }
+    const key = f + ':' + p.id, expanded = S.showAllFin.has(key), total = rows.length;
+    if (!expanded) rows = rows.slice(0, 3);
+    const more = total - rows.length;
+    h += `<div class="tablewrap"><table><thead><tr><th>Status</th><th>Date marked</th><th>From order</th><th>${esc(v.opened)}</th><th>Finished / written off</th><th class="r">Days in use</th><th></th></tr></thead><tbody>`;
+    rows.forEach(u => {
+      const isNext = s.stock[0] && s.stock[0].id===u.id;
+      const tag = u.status==='open' ? `<span class="tag open">${esc(v.inUse)}</span>` : u.status==='finished' ? `<span class="tag fin">Finished</span>` : u.status==='writtenoff' ? `<span class="tag wo">Written off</span>${u.writeOffReason?`<div class="hint">${esc(WO_REASONS[u.writeOffReason]||u.writeOffReason)}${u.writeOffNote?' · '+esc(u.writeOffNote):''}</div>`:''}` : isNext ? `<span class="tag next">Next</span>` : `<span class="tag">In stock</span>`;
+      const endD = u.status==='writtenoff' ? u.writtenOffDate : u.finishedDate;
+      const din = u.openedDate ? daysBetween(u.openedDate, endD||today()) : null;
+      const age = u.receivedDate ? daysBetween(u.receivedDate, today()) : 0;
+      const oldPill = u.status==='stock' && age > a.shelf ? ` <span class="pill warn">${age}d old</span>` : '';
+      const longPill = u.status==='open' && a.maxOpen && din > a.maxOpen ? ` <span class="pill warn">Open too long</span>` : '';
+      const acts = S.readOnly ? '' : (u.status==='stock' && isNext && !s.open.length ? `<button class="btn sm" data-act="open" data-id="${u.id}">${esc(v.open)}</button>` : u.status==='open' ? `<button class="btn sm primary" data-act="finish" data-id="${u.id}">Mark finished</button>` : '') + (u.status==='stock'||u.status==='open' ? ` <button class="btn sm" data-act="writeoff" data-id="${u.id}" title="Management only">Write off</button>` : '');
+      h += `<tr><td>${tag}</td><td class="num">${fmtDate(u.receivedDate)}${oldPill}</td><td>${fromOrder(u)}</td><td class="num">${fmtDate(u.openedDate)}</td><td class="num">${fmtDate(endD)}</td><td class="r num">${din!=null?din:'—'}${longPill}</td><td class="r">${acts}</td></tr>`;
+    });
+    h += `</tbody></table></div>`;
+    if (total > 3) h += `<button class="expander" data-showfin="${key}" aria-expanded="${expanded}">${expanded ? '▴ Show fewer' : `▾ Show all ${total} (${more} more)`}</button>`;
+  });
+  return h + `</div>`;
+}
+
+function renderOrders(){
+  const F = S.orderFilter;
+  const years = [...new Set(S.orders.map(o=>(o.orderDate||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const q = F.q.trim().toLowerCase();
+  const list = S.orders.filter(o =>
+    (F.origin==='all' || (F.origin==='china') === isChina(o)) &&
+    (F.year==='all' || (o.orderDate||'').startsWith(F.year)) &&
+    (!q || [o.supplier, o.orderNo, o.notes].some(v => String(v||'').toLowerCase().includes(q))));
+  const isIn = o => o.status==='received' || o.status==='partial';
+  const flagFirst = (a,b) => (b.status==='partial') - (a.status==='partial');
+  const onOrder = list.filter(o=>!isIn(o)).sort((a,b)=>(a.expectedDate||'').localeCompare(b.expectedDate||''));
+  const awaiting = list.filter(o=>isIn(o) && isChina(o) && o.feesPending).sort((a,b)=>flagFirst(a,b) || (a.receivedDate||'').localeCompare(b.receivedDate||''));
+  const done = list.filter(o=>isIn(o) && !(isChina(o) && o.feesPending)).sort((a,b)=>flagFirst(a,b) || (b.receivedDate||'').localeCompare(a.receivedDate||''));
+
+  const who = o => `${esc(o.supplier||'—')} <span class="tag">${isChina(o)?'China':'UK'}</span>${o.orderNo?`<div class="hint">#${esc(o.orderNo)}</div>`:''}`;
+  const items = o => `<td style="white-space:normal;min-width:170px">${(o.lines||[]).map(l=>`${num(l.qty)}× ${esc(P(l.productId).short)}`).join(', ')}${num(o.otherGoods)?` + other ${money(o.otherGoods)}`:''}${o.status==='partial'?`<div class="oflag"><span class="pill crit">Part delivered</span> <span>Still to come: <b>${esc(outstandingText(o))}</b></span> <span class="hint">${esc(lastChase(o))}</span></div>`:''}${(o.shortClosed||[]).length?`<div class="hint">Closed short: ${esc(o.shortClosed.map(l=>`${l.qty}× ${P(l.productId).short}`).join(', '))}</div>`:''}</td>`;
+  const partBtns = o => o.status==='partial' ? btn('receive',o,'Receive rest',true) + btn('chase',o,'Log chase') : '';
+  const trc = o => o.status==='partial' ? ' class="flagged"' : '';
+  const btn = (act, o, label, primary) => S.readOnly ? '' : `<button class="btn sm ${primary?'primary':''}" data-act="${act}" data-id="${o.id}">${label}</button> `;
+  const sumOf = arr => arr.reduce((a,o)=>a+orderTotals(o).total,0);
+  const box = (title, sub, arr, head, row, empty) => `
+    <section class="obox">
+      <div class="obox-head"><div><h3>${title} <span class="ocount">${arr.length}</span></h3><div class="hint">${sub}</div></div><div class="ototal"><span class="label">Total</span><span class="num">${money(sumOf(arr))}</span></div></div>
+      ${arr.length ? `<div class="tablewrap flat"><table><thead><tr>${head}</tr></thead><tbody>${arr.map(row).join('')}</tbody></table></div>` : `<div class="empty">${empty}</div>`}
+    </section>`;
+
+  let h = `<div class="section"><div class="row spread"><h2>Orders &amp; stock</h2>${S.readOnly?'':`<div class="row"><button class="btn" data-act="newUK">New UK order</button><button class="btn primary" data-act="newChina">New China order</button></div>`}</div>
+  <div class="ofilters">
+    <div class="filters">${[['all','All'],['china','China'],['uk','UK']].map(([k,v])=>`<button class="chip" data-oorigin="${k}" aria-pressed="${F.origin===k}">${v}</button>`).join('')}</div>
+    <select id="ofYear" aria-label="Year" style="width:auto"><option value="all">All years</option>${years.map(y=>`<option value="${y}" ${F.year===y?'selected':''}>${y}</option>`).join('')}</select>
+    <input id="ofQ" type="search" placeholder="Search supplier or order number" value="${esc(F.q)}" style="flex:1 1 200px;width:auto">
+  </div>`;
+
+  h += box('On order', 'Placed and on the way, soonest due first. Counted as "on order" in stock alerts.', onOrder,
+    `<th>Supplier</th><th>Ordered</th><th>Due</th><th>Items</th><th class="r">Paid</th><th></th>`,
+    o => { const d = daysBetween(today(), o.expectedDate); const due = d < 0 ? `<span class="pill crit">${-d}d overdue</span>` : `${fmtDate(o.expectedDate)} <span class="hint">in ${d}d</span>`;
+      return `<tr><td>${who(o)}</td><td class="num">${fmtDate(o.orderDate)}</td><td class="num">${due}</td>${items(o)}<td class="r num">${money(orderTotals(o).total)}</td><td class="r">${btn('receive',o,'Receive',true)}${isChina(o)?btn('fees',o,'Add import fees'):''}${btn('editOrder',o,'Edit')}</td></tr>`; },
+    'Nothing on order. Use <b>New China order</b> when you place the next one.');
+
+  h += box('Received, awaiting import fees', 'China orders in stock where the duty / import VAT bill hasn\'t been added yet. Totals so far. Part deliveries are flagged at the top.', awaiting,
+    `<th>Supplier</th><th>Received</th><th>Ordered</th><th>Items</th><th class="r">Paid so far</th><th></th>`,
+    o => `<tr${trc(o)}><td>${who(o)}</td><td class="num">${fmtDate(o.receivedDate)} <span class="hint">${daysBetween(o.receivedDate, today())}d ago</span></td><td class="num">${fmtDate(o.orderDate)}</td>${items(o)}<td class="r num">${money(orderTotals(o).total)}</td><td class="r">${partBtns(o)}${btn('fees',o,'Add import fees',o.status!=='partial')}${btn('editOrder',o,'Edit')}</td></tr>`,
+    'No received orders waiting for import fees.');
+
+  h += box('Received', 'Delivered and fully costed, newest first. Part deliveries to chase are flagged at the top.', done,
+    `<th>Supplier</th><th>Ordered</th><th>Received</th><th>Items</th><th class="r">Goods</th><th class="r">Shipping &amp; payment fee</th><th class="r">Duty &amp; fees</th><th class="r">VAT</th><th class="r">Total</th><th></th>`,
+    o => { const t = orderTotals(o); return `<tr${trc(o)}><td>${who(o)}</td><td class="num">${fmtDate(o.orderDate)}</td><td class="num">${fmtDate(o.receivedDate)}</td>${items(o)}<td class="r num">${money(t.goods)}</td><td class="r num">${money(t.ship)}</td><td class="r num">${money(t.duty)}</td><td class="r num">${money(t.vat)}</td><td class="r num"><b>${money(t.total)}</b></td><td class="r">${partBtns(o)}${btn('editOrder',o,'Edit')}</td></tr>`; },
+    q || F.origin!=='all' || F.year!=='all' ? 'No received orders match these filters.' : 'No completed orders yet.');
+
+  return h + `</div>`;
+}
+
+const PERIODS = [['month','This month'],['lastmonth','Last month'],['quarter','This quarter'],['lastquarter','Last quarter'],['year','This year'],['lastyear','Last year'],['12m','Last 12 months'],['custom','Custom range']];
+function periodRange(){
+  const P = S.period, t = parse(today()), y = t.getFullYear(), m = t.getMonth(), q = Math.floor(m/3);
+  const d = (Y,M,D) => isoDate(new Date(Y,M,D));
+  switch (P.preset){
+    case 'month': return [d(y,m,1), d(y,m+1,0)];
+    case 'lastmonth': return [d(y,m-1,1), d(y,m,0)];
+    case 'quarter': return [d(y,q*3,1), d(y,q*3+3,0)];
+    case 'lastquarter': return [d(y,q*3-3,1), d(y,q*3,0)];
+    case 'lastyear': return [d(y-1,0,1), d(y-1,11,31)];
+    case '12m': return [addDays(today(),-364), today()];
+    case 'custom': { const a = P.from || addDays(today(),-29), b = P.to || today(); return a <= b ? [a,b] : [b,a]; }
+    default: return [d(y,0,1), d(y,11,31)];
+  }
+}
+const inR = (date, r) => !!date && date >= r[0] && date <= r[1];
+// every payment an order caused, on the date it was paid
+function payments(o){
+  const base = orderTotals({...o, charges:[], vat:0, duty:0});
+  const out = [{date:o.orderDate, amount:base.goods + base.ship, vat:0}];
+  if (num(o.vat)) out.push({date:o.orderDate, amount:num(o.vat), vat:num(o.vat)});
+  if (num(o.duty)) out.push({date:o.orderDate, amount:num(o.duty), vat:0});
+  (o.charges||[]).forEach(c => out.push({date:c.date||o.orderDate, amount:num(c.amount), vat:c.type==='vat'?num(c.amount):0}));
+  return out;
+}
+
+function renderUsage(all){
+  const f = S.usageFilter, r = periodRange();
+  const days = Math.max(1, daysBetween(r[0], r[1] < today() ? r[1] : today()) + 1);
+  const forP = u => f==='all' || u.productId===f;
+  // paid out (share of each order for one product when filtered)
+  let paid = 0, paidVat = 0, nPay = 0;
+  const payList = [];
+  S.orders.forEach(o => {
+    const t = orderTotals(o);
+    const share = f==='all' ? 1 : (t.goods ? orderedQty(o,f) ? (o.lines||[]).filter(l=>l.productId===f).reduce((a,l)=>a+num(l.qty)*num(l.unitPrice),0)/t.goods : 0 : 0);
+    if (!share) return;
+    payments(o).forEach(p => { payList.push({date:p.date, amount:p.amount*share}); if (inR(p.date, r)){ paid += p.amount*share; paidVat += p.vat*share; nPay++; } });
+  });
+  const fin = S.units.filter(u => u.status==='finished' && forP(u) && inR(u.finishedDate, r));
+  const used = fin.reduce((a,u)=>a+costOf(u),0);
+  const wo = S.units.filter(u => u.status==='writtenoff' && forP(u) && inR(u.writtenOffDate, r));
+  const woVal = wo.reduce((a,u)=>a+costOf(u),0);
+  const stockVal = S.units.filter(u=>(u.status==='stock'||u.status==='open') && forP(u)).reduce((a,u)=>a+costOf(u),0);
+  const perWeek = used / days * 7, perMonth = used / days * 30.44;
+
+  // months in range
+  const months = [];
+  let cur = new Date(parse(r[0]).getFullYear(), parse(r[0]).getMonth(), 1);
+  const end = parse(r[1]);
+  while (cur <= end && months.length < 36){ months.push({key:`${cur.getFullYear()}-${pad(cur.getMonth()+1)}`, label:cur.toLocaleDateString('en-GB',{month:'short'}) + (months.length===0 || cur.getMonth()===0 ? ' ' + String(cur.getFullYear()).slice(2) : ''), used:0, paid:0, count:0}); cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1); }
+  fin.forEach(u => { const m = months.find(m=>m.key===u.finishedDate.slice(0,7)); if (m){ m.used += costOf(u); m.count++; } });
+  payList.forEach(p => { if (!inR(p.date, r)) return; const m = months.find(m=>m.key===String(p.date).slice(0,7)); if (m) m.paid += p.amount; });
+
+  let h = `<div class="section"><div class="row spread"><h2>Usage &amp; costs</h2>
+    <div class="filters"><button class="chip" data-ufilter="all" aria-pressed="${f==='all'}">All</button>${productList().map(p=>`<button class="chip" data-ufilter="${p.id}" aria-pressed="${f===p.id}">${esc(p.short)}</button>`).join('')}</div></div>
+  <div class="perbar"><label for="perPreset" class="label">Period</label>
+    <select id="perPreset">${PERIODS.map(([k,v])=>`<option value="${k}" ${S.period.preset===k?'selected':''}>${v}</option>`).join('')}</select>
+    ${S.period.preset==='custom'?`<input type="date" id="perFrom" value="${r[0]}" aria-label="From"><span class="hint">to</span><input type="date" id="perTo" value="${r[1]}" aria-label="To">`:''}
+    <span class="hint">${fmtDate(r[0])} – ${fmtDate(r[1])}${f!=='all'?' · '+esc(P(f).name):''}</span></div>
+  <div class="stats">
+    <div class="stat"><span class="label">Paid out (incl. VAT)</span><span class="v">${money(paid)}</span><span class="s">VAT ${money(paidVat)} · orders, shipping and import bills by date paid${f!=='all'?' · this product’s share':''}</span></div>
+    <div class="stat"><span class="label">Supplies used</span><span class="v">${money(used)}</span><span class="s">${fin.length} item${fin.length===1?'':'s'} finished · ex VAT</span></div>
+    <div class="stat"><span class="label">Running cost</span><span class="v">${money(perWeek)}<span class="hint" style="font-size:13px"> /week</span></span><span class="s">${money(perMonth)} a month on average over this period</span></div>
+    <div class="stat"><span class="label">Written off</span><span class="v">${money(woVal)}</span><span class="s">${wo.length} item${wo.length===1?'':'s'} damaged, leaked or lost</span></div>
+    <div class="stat"><span class="label">Stock on hand now</span><span class="v">${money(stockVal)}</span><span class="s">In stock + open, ex VAT</span></div>
+  </div>`;
+
+
+  h += `<div class="chartbox"><div class="row spread" style="margin-bottom:6px"><h3>Supplies used by month</h3><span class="hint">Cost of rolls and bottles finished, ex VAT${f!=='all'?' · '+esc(P(f).name):''}</span></div>${monthChart(months)}</div>`;
+
+  h += priceReport(f);
+
+  // usage by product (in period)
+  h += `<h3 style="margin-top:6px">Usage by product</h3><div class="tablewrap"><table><thead><tr><th>Product</th><th class="r">Finished</th><th class="r">Avg days per item</th><th class="r">Shortest</th><th class="r">Longest</th><th class="r">Per month</th><th class="r">Cost used</th></tr></thead><tbody>`;
+  productList().filter(p=>f==='all'||p.id===f).forEach(p => {
+    const pf = fin.filter(u=>u.productId===p.id);
+    const durs = pf.filter(u=>u.openedDate).map(u=>daysBetween(u.openedDate,u.finishedDate)).filter(d=>d>=1);
+    const avg = durs.length ? durs.reduce((a,b)=>a+b,0)/durs.length : null;
+    h += `<tr><td><span class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</span></td><td class="r num">${pf.length}</td><td class="r num">${avg?Math.round(avg):'—'}</td><td class="r num">${durs.length?Math.min(...durs):'—'}</td><td class="r num">${durs.length?Math.max(...durs):'—'}</td><td class="r num">${(pf.length/days*30.44).toFixed(1)}</td><td class="r num">${money(pf.reduce((a,u)=>a+costOf(u),0))}</td></tr>`;
+  });
+  h += `</tbody></table></div>`;
+
+  h += `<h3 style="margin-top:6px">Written off</h3>`;
+  if (!wo.length) h += `<div class="tablewrap"><div class="empty">Nothing written off in this period.</div></div>`;
+  else {
+    h += `<div class="tablewrap"><table><thead><tr><th>Product</th><th>Date marked</th><th>Written off</th><th>Reason</th><th class="r">Cost ex VAT</th></tr></thead><tbody>`;
+    wo.slice().sort((a,b)=>(b.writtenOffDate||'').localeCompare(a.writtenOffDate||'')).forEach(u => { const p = P(u.productId); h += `<tr><td><span class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.short)}</span></td><td class="num">${fmtDate(u.receivedDate)}</td><td class="num">${fmtDate(u.writtenOffDate)}</td><td style="white-space:normal">${esc(WO_REASONS[u.writeOffReason]||u.writeOffReason||'—')}${u.writeOffNote?` <span class="hint">${esc(u.writeOffNote)}</span>`:''}</td><td class="r num">${money(costOf(u))}</td></tr>`; });
+    h += `<tr><td colspan="4"><b>Total</b></td><td class="r num"><b>${money(woVal)}</b></td></tr></tbody></table></div>`;
+  }
+  return h + `</div>`;
+}
+
+const pct = (a,b) => (b && a!=null) ? (a-b)/b*100 : null;
+const chg = v => v==null || !isFinite(v) ? '<span class="hint">—</span>' : `<span class="chg ${v>=5?'up':v<=-5?'down':''}">${v>0.05?'▲ ':v<-0.05?'▼ ':''}${Math.abs(v).toFixed(1)}%</span>`;
+function priceHistory(pid){
+  const os = S.orders.filter(o=>orderedQty(o,pid)>0).sort((a,b)=>(a.orderDate||'').localeCompare(b.orderDate||''));
+  const lastBy = {};
+  return os.map(o => {
+    const q = orderedQty(o,pid);
+    const price = (o.lines||[]).filter(l=>l.productId===pid).reduce((a,l)=>a+num(l.qty)*num(l.unitPrice),0)/q;
+    const landed = landedForProduct(o,pid).exVat;
+    const key = isChina(o) ? 'china' : 'uk';
+    const prev = lastBy[key]; lastBy[key] = {price, landed};
+    return {o, q, price, landed, prevPrice: prev ? prev.price : null, prevLanded: prev ? prev.landed : null, pending: isChina(o) && o.feesPending};
+  });
+}
+function spark(vals){
+  if (vals.length < 2) return '<span class="hint">—</span>';
+  const W = 84, H = 24, min = Math.min(...vals), max = Math.max(...vals), rng = (max-min) || 1;
+  const pts = vals.map((v,i)=>[2 + i*(W-4)/(vals.length-1), H-3 - (v-min)/rng*(H-6)]);
+  const e = pts[pts.length-1];
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="1.5"/><circle cx="${e[0].toFixed(1)}" cy="${e[1].toFixed(1)}" r="2.5" fill="var(--accent)"/></svg>`;
+}
+function priceReport(f){
+  const prods = productList().filter(p=>f==='all'||p.id===f);
+  const name = p => `<span class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</span>`;
+  let h = `<section class="obox"><div class="obox-head"><div><h3>Price changes</h3><div class="hint">Price per item ex VAT, compared with your previous order from the same place (China or UK). Rises of 5% or more are highlighted. Click a product to see every order.</div></div></div>
+  <div class="tablewrap flat"><table><thead><tr><th>Product</th><th class="r">Last price</th><th class="r">vs previous order</th><th class="r">vs 12 months ago</th><th class="r">Full cost each</th><th>Trend</th><th class="r">Orders</th><th></th></tr></thead><tbody>`;
+  prods.forEach(p => {
+    const hist = priceHistory(p.id);
+    if (!hist.length){ h += `<tr><td>${name(p)}</td><td colspan="7" class="hint">No orders logged yet</td></tr>`; return; }
+    const cn = hist.some(x=>isChina(x.o));
+    const same = hist.filter(x=>isChina(x.o)===cn);
+    const last = same[same.length-1];
+    const yr = same.find(x=>daysBetween(x.o.orderDate, today()) <= 365);
+    const y12 = yr && yr !== last ? pct(last.price, yr.price) : null;
+    const open = S.priceOpen.has(p.id) || f===p.id;
+    h += `<tr class="pexp" data-pexp="${p.id}" tabindex="0" aria-expanded="${open}"><td>${name(p)} <span class="tag">${cn?'China':'UK'}</span></td><td class="r num">${money(last.price)}</td><td class="r num">${chg(pct(last.price,last.prevPrice))}</td><td class="r num">${chg(y12)}</td><td class="r num">${money(last.landed)}${last.pending?'<div class="hint">import fees to come</div>':''}</td><td>${spark(same.slice(-12).map(x=>x.price))}</td><td class="r num">${hist.length}</td><td class="r"><span class="chev">${open?'▾':'▸'}</span></td></tr>`;
+    if (open) h += `<tr class="drill"><td colspan="8"><div class="drillbox"><table><thead><tr><th>Ordered</th><th>Supplier</th><th class="r">Qty</th><th class="r">Price each</th><th class="r">Change</th><th class="r">Full cost each</th><th class="r">Change</th></tr></thead><tbody>${hist.slice().reverse().map(x=>`<tr><td class="num">${fmtDate(x.o.orderDate)}</td><td>${esc(x.o.supplier||'—')} <span class="tag">${isChina(x.o)?'China':'UK'}</span>${x.o.orderNo?` <span class="hint">#${esc(x.o.orderNo)}</span>`:''}</td><td class="r num">${x.q}</td><td class="r num">${money(x.price)}</td><td class="r num">${chg(pct(x.price,x.prevPrice))}</td><td class="r num">${money(x.landed)}${x.pending?' <span class="hint">so far</span>':''}</td><td class="r num">${chg(pct(x.landed,x.prevLanded))}</td></tr>`).join('')}</tbody></table></div></td></tr>`;
+  });
+  return h + `</tbody></table></div><div class="hint" style="padding:8px 14px">Full cost each = price + its share of shipping, payment fee and import duty (ex VAT). It also moves with order size and shipping rates, so check the price column first.</div></section>`;
+}
+
+function monthChart(months){
+  const W = 720, H = 200, L = 54, B = 26, T = 12, R = 8;
+  const max = Math.max(0, ...months.map(m=>m.used));
+  const niceMax = max<=0 ? 100 : (() => { const p = Math.pow(10, Math.floor(Math.log10(max))); const n = Math.ceil(max/p); return (n<=2?2:n<=5?5:10)*p; })();
+  const ih = H-T-B, iw = W-L-R, bw = iw/Math.max(1, months.length);
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:520px;display:block" role="img" aria-label="Supplies used per month">`;
+  for (let i=0;i<=4;i++){ const v = niceMax*i/4, y = T+ih-ih*i/4; s += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y+3.5}" text-anchor="end">£${v>=1000?(v/1000)+'k':v}</text>`; }
+  const step = Math.ceil(months.length / 12);
+  months.forEach((m,i) => {
+    const w = bw*0.62, x0 = L + i*bw + (bw-w)/2, hu = ih*m.used/niceMax;
+    s += `<rect x="${x0}" y="${T+ih-hu}" width="${w}" height="${hu}" rx="2" fill="var(--accent)"><title>${m.label}: ${money(m.used)} (${m.count} item${m.count===1?'':'s'} finished)</title></rect>`;
+    if (m.used > 0 && months.length <= 12) s += `<text x="${x0+w/2}" y="${T+ih-hu-5}" text-anchor="middle">£${Math.round(m.used)}</text>`;
+    if (i % step === 0) s += `<text x="${L+i*bw+bw/2}" y="${H-8}" text-anchor="middle">${m.label}</text>`;
+  });
+  if (max<=0) s += `<text x="${L+iw/2}" y="${T+ih/2}" text-anchor="middle">Nothing finished in this period</text>`;
+  return s + `</svg>`;
+}
+
+function renderSettings(){
+  const st = S.settings;
+  const unlocked = mgrOk() && !S.readOnly, dis = unlocked ? '' : 'disabled';
+  let h = `<div class="section"><div class="row spread"><h2>Settings</h2>${unlocked?`<div class="row"><span class="pill ok">Unlocked</span><button class="btn sm" data-act="lockMgr">Lock</button></div>`:'<span class="pill neutral">Locked</span>'}</div>
+  ${unlocked||S.readOnly?'':`<div class="perbar"><span class="hint" style="flex:1 1 220px">Settings can only be changed by management. Enter the PIN to unlock for 10 minutes.</span><input id="setPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Management PIN" style="width:160px" aria-label="Management PIN"><button class="btn primary" data-act="unlockMgr">Unlock</button><span id="pinErr" class="hint" style="color:var(--crit)"></span></div>`}
+  <div class="tablewrap" style="padding:14px"><div class="fields">
+    <div class="field"><label for="setLead">Lead time from China (days)</label><input id="setLead" type="number" min="1" value="${num(st.leadDays)||90}" ${dis}></div>
+    <div class="field"><label for="setSup">China supplier name</label><input id="setSup" value="${esc(st.chinaSupplier||'')}" placeholder="Filled in on every China order" ${dis}></div>
+    <div class="field"><label for="setVat">VAT rate (%) for UK orders</label><input id="setVat" type="number" min="0" step="0.5" value="${st.vatRate??20}" ${dis}></div>
+  </div></div>
+  <h3>Stock levels and old stock warnings</h3>
+  <p class="hint" style="margin:0">How long items last is worked out from your last 5 finished of each product. Until one has been finished, reorder alerts only check stock against the minimum. Old stock is flagged when an unopened item's marked date is older than the unopened limit, or when an item has been open longer than the open limit. Leave the open limit blank to use twice the item's usual life.</p>
+  <div class="tablewrap"><table><thead><tr><th>Product</th><th>Unit</th><th>Minimum in stock</th><th>Warn if unopened over (days)</th><th>Warn if open over (days)</th></tr></thead><tbody>`;
+  productList().forEach(p => {
+    h += `<tr><td><span class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</span></td><td>${esc(p.unit)}</td><td><input type="number" min="0" style="width:90px" id="min-${p.id}" data-min="${p.id}" value="${p.minStock}" ${dis}></td><td><input type="number" min="1" style="width:100px" id="shelf-${p.id}" data-shelf="${p.id}" value="${p.shelfDays||180}" ${dis}></td><td><input type="number" min="1" style="width:100px" id="mo-${p.id}" data-maxopen="${p.id}" value="${p.maxOpenDays||''}" placeholder="auto" ${dis}></td></tr>`;
+  });
+  h += `</tbody></table></div>${unlocked?`<div><button class="btn primary" data-act="saveSettings">Save settings</button></div>`:''}</div>`;
+  return h;
+}
+
+// ---------- modal ----------
+function modal(html, onMount){
+  const root = $('#modalRoot');
+  root.innerHTML = `<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  const ov = $('#ov');
+  ov.addEventListener('click', e => { if (e.target===ov || e.target.closest('[data-close]')) closeModal(); });
+  const first = ov.querySelector('input,select,button.primary');
+  if (first) first.focus();
+  if (onMount) onMount(ov);
+}
+function closeModal(){ $('#modalRoot').innerHTML = ''; }
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter' && e.target.id==='setPin'){ e.preventDefault(); const b = document.querySelector('[data-act=unlockMgr]'); if (b) b.click(); return; } if (e.key==='Escape') closeModal(); if ((e.key==='Enter'||e.key===' ') && e.target.dataset && (e.target.dataset.pexp || e.target.dataset.jump)){ e.preventDefault(); e.target.click(); } });
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t = document.createElement('div'); t.className='toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2600); }
+const prodOptions = sel => productList().map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.name)}</option>`).join('');
+
+async function write(fn, ok){
+  if (!db){ toast('Saving isn’t available in this view.'); return false; }
+  try { await fn(); if (ok) toast(ok); return true; }
+  catch(e){
+    if (e && e.code==='invalid_argument'){ S.readOnly = true; render(); toast('You don’t have permission to change this tracker.'); }
+    else if (e && e.code==='quota_exceeded'){ toast('Storage is full — delete some old records.'); }
+    else toast('Couldn’t save. Check your connection and try again.');
+    return false;
+  }
+}
+
+function openAddStock(){
+  modal(`<h2>Log stock received</h2>
+    <p class="hint" style="margin:0">Use this for stock already on the shelf or a delivery not logged as an order. Enter the date marked on the items.</p>
+    <div class="fields">
+      <div class="field" style="flex-basis:100%"><label for="asProd">Product</label><select id="asProd">${prodOptions('roll')}</select></div>
+      <div class="field"><label for="asQty">Quantity</label><input id="asQty" type="number" min="1" value="1"></div>
+      <div class="field"><label for="asDate">Date marked on items</label><input id="asDate" type="date" value="${today()}"></div>
+      <div class="field"><label for="asCost">Cost per item, ex VAT (£)</label><input id="asCost" type="number" min="0" step="0.01" placeholder="optional"></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="asSave">Add to stock</button></div>`, ov => {
+    $('#asSave', ov).onclick = async () => {
+      const qty = Math.max(1, Math.min(200, Math.floor(num($('#asQty').value))));
+      const productId = $('#asProd').value, receivedDate = $('#asDate').value || today(), cost = num($('#asCost').value);
+      const ok = await write(async () => { for (let i=0;i<qty;i++){ await db.collection('units').doc('u'+uid()).set({productId, receivedDate, status:'stock', costExVat:cost||null, vat:null, orderId:null, created:new Date().toISOString()}); }}, `Added ${qty} × ${P(productId).short} to stock`);
+      if (ok) closeModal();
+    };
+  });
+}
+
+function openAddOpen(){
+  modal(`<h2>Log an item that's already open</h2>
+    <p class="hint" style="margin:0">For a bottle already opened or a roll already on the printer when you start using this tracker.</p>
+    <div class="fields">
+      <div class="field" style="flex-basis:100%"><label for="aoProd">Product</label><select id="aoProd">${prodOptions('moist')}</select></div>
+      <div class="field"><label for="aoRec">Date marked on item</label><input id="aoRec" type="date" value="${today()}"></div>
+      <div class="field"><label for="aoOpen">Opened / put on</label><input id="aoOpen" type="date" value="${today()}"></div>
+      <div class="field"><label for="aoCost">Cost ex VAT (£)</label><input id="aoCost" type="number" min="0" step="0.01" placeholder="optional"></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="aoSave">Save</button></div>`, ov => {
+    $('#aoSave', ov).onclick = async () => {
+      const productId = $('#aoProd').value;
+      const ok = await write(() => db.collection('units').doc('u'+uid()).set({productId, receivedDate:$('#aoRec').value||today(), openedDate:$('#aoOpen').value||today(), status:'open', costExVat:num($('#aoCost').value)||null, vat:null, orderId:null, created:new Date().toISOString()}), `Logged open ${P(productId).short}`);
+      if (ok) closeModal();
+    };
+  });
+}
+
+function openUseUnit(id){
+  const u = S.units.find(x=>x.id===id); if (!u) return;
+  const p = P(u.productId), v = verbs(p), s = statsFor(p);
+  const cur = s.open[0];
+  if (cur){
+    modal(`<h2>Finish the current ${esc(p.unit)} first</h2>
+      <div class="alert crit"><div class="msg">A ${esc(p.name.toLowerCase())} has been ${esc(v.opened.toLowerCase())} since ${fmtDate(cur.openedDate)}. Only one can be in use at a time. Mark it finished (or ask management to write it off) before starting the next one.</div></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Close</button><button class="btn primary" id="ouFin">Mark current finished</button></div>`, ov => { $('#ouFin', ov).onclick = () => openFinish(cur.id); });
+    return;
+  }
+  if (s.stock[0] && s.stock[0].id !== u.id){
+    modal(`<h2>Use the oldest ${esc(p.unit)} first</h2>
+      <div class="alert crit"><div class="msg">This one is dated ${fmtDate(u.receivedDate)}. The oldest in stock is dated <b>${fmtDate(s.stock[0].receivedDate)}</b>, so that one has to be used first.</div></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Close</button><button class="btn primary" id="ouOldest">${esc(v.open)} the oldest instead</button></div>`, ov => {
+      $('#ouOldest', ov).onclick = () => openUseUnit(s.stock[0].id);
+    });
+    return;
+  }
+  modal(`<h2>${esc(v.open)} ${esc(p.name)}</h2>
+    <p style="margin:0">Item dated <b>${fmtDate(u.receivedDate)}</b>. This is the oldest in stock.</p>
+    ${cur?`<div class="alert warn"><div class="msg">Only one ${p.kind==='roll'?'roll can be on the printer':'bottle can be open'} at a time. The current one (${esc(v.opened.toLowerCase())} ${fmtDate(cur.openedDate)}) will be marked <b>finished</b> on the same date.</div></div>`:''}
+    <div class="fields"><div class="field"><label for="ouDate">${esc(v.opened)} on</label><input id="ouDate" type="date" value="${today()}" max="${today()}"></div></div>
+    <div id="ouErr" class="alert crit" hidden><div class="msg"></div></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ouSave">${cur?`Finish current and ${esc(v.open.toLowerCase())}`:esc(v.open)}</button></div>`, ov => {
+    const check = () => {
+      const d = $('#ouDate').value || today(); let err = '';
+      if (d > today()) err = 'The date can’t be in the future.';
+      else if (u.receivedDate && d < u.receivedDate) err = `It can’t be ${v.opened.toLowerCase()} before it was received (${fmtDate(u.receivedDate)}).`;
+      else if (cur && d < cur.openedDate) err = `The current one was ${v.opened.toLowerCase()} ${fmtDate(cur.openedDate)}, so this date can’t be earlier.`;
+      $('#ouErr').hidden = !err; $('#ouErr .msg').textContent = err; $('#ouSave').disabled = !!err; return !err;
+    };
+    ov.addEventListener('input', check); check();
+    $('#ouSave', ov).onclick = async () => {
+      if (!check()) return;
+      const d = $('#ouDate').value || today();
+      const ok = await write(async () => {
+        for (const o of s.open) await db.collection('units').doc(o.id).update({status:'finished', finishedDate:d});
+        await db.collection('units').doc(u.id).update({status:'open', openedDate:d});
+      }, `${v.opened} ${p.short} dated ${fmtDate(u.receivedDate)}`);
+      if (ok) closeModal();
+    };
+  });
+}
+
+function openFinish(id){
+  const u = S.units.find(x=>x.id===id); if (!u) return;
+  const p = P(u.productId), v = verbs(p), s = statsFor(p);
+  const next = s.stock[0];
+  modal(`<h2>Mark ${esc(p.name)} finished</h2>
+    <p style="margin:0">${esc(v.opened)} ${fmtDate(u.openedDate)} · dated ${fmtDate(u.receivedDate)}</p>
+    <div class="fields"><div class="field"><label for="fnDate">Finished on</label><input id="fnDate" type="date" value="${today()}"></div></div>
+    ${next?`<label class="row" style="gap:8px"><input type="checkbox" id="fnNext" style="width:auto" checked> ${esc(v.open)} the next one (dated ${fmtDate(next.receivedDate)}) the same day</label>`:`<div class="alert crit"><div class="msg">That was the last ${esc(p.unit)} — none left in stock.</div></div>`}
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fnSave">Mark finished</button></div>`, ov => {
+    $('#fnSave', ov).onclick = async () => {
+      const d = $('#fnDate').value || today();
+      if (u.openedDate && d < u.openedDate){ toast('Finished date can’t be before it was opened.'); return; }
+      const andNext = next && $('#fnNext') && $('#fnNext').checked;
+      const ok = await write(async () => {
+        await db.collection('units').doc(u.id).update({status:'finished', finishedDate:d});
+        if (andNext) await db.collection('units').doc(next.id).update({status:'open', openedDate:d});
+      }, andNext ? `Finished; next ${p.short} ${v.opened.toLowerCase()}` : `${p.short} marked finished`);
+      if (ok) closeModal();
+    };
+  });
+}
+
+const WO_REASONS = {damaged:'Damaged', leaked:'Leaked', expired:'Expired / dried out', lost:'Lost', other:'Other'};
+function openWriteOff(id){
+  const u = S.units.find(x=>x.id===id); if (!u) return;
+  const p = P(u.productId);
+  modal(`<h2>Write off ${esc(p.name)}</h2>
+    <p class="hint" style="margin:0">Management only. Use this for faulty, damaged, leaked or lost stock.</p>
+    <p style="margin:0">Dated ${fmtDate(u.receivedDate)}${u.openedDate?` · ${esc(verbs(p).opened.toLowerCase())} ${fmtDate(u.openedDate)}`:''} · cost ${money(costOf(u))} ex VAT</p>
+    <p class="hint" style="margin:0">It leaves stock but stays in your records, and its cost shows under <b>Written off</b> in Usage &amp; costs.</p>
+    <div class="fields">
+      <div class="field"><label for="woReason">Reason</label><select id="woReason">${Object.entries(WO_REASONS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div class="field"><label for="woDate">Date</label><input id="woDate" type="date" value="${today()}"></div>
+      <div class="field" style="flex-basis:100%"><label for="woNote">Note</label><input id="woNote" placeholder="e.g. Cap cracked in delivery, claimed from supplier"></div>
+      ${pinField('woPin')}
+    </div>
+    <div id="woErr" class="alert crit" hidden><div class="msg"></div></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="woSave">Write off</button></div>`, ov => {
+    $('#woSave', ov).onclick = async () => {
+      if (!mgrOk() && !(await checkPin(($('#woPin')||{}).value||''))){ $('#woErr').hidden = false; $('#woErr .msg').textContent = 'Wrong management PIN. Only management can write off stock.'; return; }
+      const data = {status:'writtenoff', writtenOffDate:$('#woDate').value||today(), writeOffReason:$('#woReason').value, writeOffNote:$('#woNote').value.trim()};
+      if (await write(()=>db.collection('units').doc(u.id).update(data), `${p.short} written off`)) closeModal();
+    };
+  });
+}
+
+const chargeRow = (c, i) => `<div class="line" data-ci="${i}"><select data-k="type" id="oc-t-${i}" aria-label="Charge type">${Object.entries(CHARGE_TYPES).map(([k,v])=>`<option value="${k}" ${c.type===k?'selected':''}>${v}</option>`).join('')}</select><input type="number" min="0" step="0.01" data-k="amount" id="oc-a-${i}" value="${c.amount||''}" placeholder="£" aria-label="Amount"><input type="date" data-k="date" id="oc-d-${i}" value="${c.date||today()}" aria-label="Date paid"><button class="btn sm" data-crm="${i}" aria-label="Remove charge">✕</button></div>`;
+const readCharges = root => [...root.querySelectorAll('[data-ci]')].map(r=>({type:$('[data-k=type]',r).value, amount:num($('[data-k=amount]',r).value), date:$('[data-k=date]',r).value||today()}));
+
+function lastPrice(pid, origin){
+  const os = S.orders.filter(o=>(o.origin||'china')===origin).sort((a,b)=>(b.orderDate||'').localeCompare(a.orderDate||''));
+  for (const o of os){ const l = (o.lines||[]).find(l=>l.productId===pid && num(l.unitPrice)>0); if (l) return num(l.unitPrice); }
+  return 0;
+}
+
+function openOrder(id, originArg){
+  const existing = id ? S.orders.find(o=>o.id===id) : null;
+  const origin = existing ? (existing.origin||'china') : (originArg||'china');
+  const cn = origin==='china';
+  const lead = num(S.settings.leadDays)||90, vr = num(S.settings.vatRate ?? 20), incMul = 1 + vr/100;
+  const o = existing ? JSON.parse(JSON.stringify(existing)) : {supplier: cn ? (S.settings.chinaSupplier||'') : '', orderNo:'', orderDate:today(), expectedDate:addDays(today(), cn?lead:7), lines:[], shipping:0, processing:0, otherGoods:0, vat:0, vatAuto:true, charges:[], feesPending:cn, pricesIncVat:false, notes:'', status:'ordered'};
+  o.charges = o.charges || [];
+  if (num(o.duty)) { o.charges.push({type:'duty', amount:num(o.duty), date:o.orderDate}); o.duty = 0; }
+  if (cn && num(o.vat)) { o.charges.push({type:'vat', amount:num(o.vat), date:o.orderDate}); o.vat = 0; }
+  if (o.feesPending === undefined) o.feesPending = cn && !o.charges.length;
+  const mul = o.pricesIncVat ? incMul : 1;
+  const show = v => v ? String(Math.round(v*mul*100)/100) : '';
+  const qtyOf = pid => (o.lines||[]).filter(l=>l.productId===pid).reduce((a,l)=>a+num(l.qty),0);
+  const priceOf = pid => { const ls = (o.lines||[]).filter(l=>l.productId===pid && num(l.qty)); if (ls.length){ const q = ls.reduce((a,l)=>a+num(l.qty),0); return ls.reduce((a,l)=>a+num(l.qty)*num(l.unitPrice),0)/q; } return lastPrice(pid, origin); };
+  const isIn = !!existing && (existing.status==='received' || existing.status==='partial');
+  const linked = {};
+  productList().forEach(p => { const us = existing ? S.units.filter(u=>u.orderId===existing.id && u.productId===p.id) : []; linked[p.id] = {have:us.length, removable:us.filter(u=>u.status==='stock').sort((a,b)=>(b.created||'').localeCompare(a.created||''))}; });
+  const rows = productList().map(p=>`<div class="pg-row"><span class="prod"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}<span class="hint">per ${esc(p.unit)}</span></span><input type="number" min="0" step="1" id="pq-${p.id}" value="${qtyOf(p.id)||''}" placeholder="0" aria-label="${esc(p.name)} quantity"><input type="number" min="0" step="0.01" id="pp-${p.id}" value="${show(priceOf(p.id))}" placeholder="£" aria-label="${esc(p.name)} price each">${isIn?`<input type="number" min="0" step="1" id="pr-${p.id}" value="${linked[p.id].have||''}" placeholder="0" aria-label="${esc(p.name)} received">`:''}<span class="num r" id="pl-${p.id}" data-lt></span></div>`).join('');
+  modal(`<h2>${existing?'Edit':'New'} ${cn?'China':'UK'} order</h2>
+    <p class="hint" style="margin:0">${cn
+      ? `Copy the figures from the supplier's confirmation, using the <b>GBP</b> "Order details" box. Don't add duty or import VAT here. Use <b>Add import fees</b> on the order when that bill arrives.`
+      : `For orders from UK suppliers. VAT is worked out on goods and delivery, and you can type over it to match the invoice.`}</p>
+    ${isIn?'<div class="banner">This order has been received. Fix anything here: quantities ordered, prices, fees and how many actually arrived. Stock and costs update to match when you save.</div>':''}
+    <div class="fields">
+      <div class="field"><label for="oSup">Supplier</label><input id="oSup" value="${esc(o.supplier||'')}" placeholder="${cn?'Your China supplier':'Supplier name'}"></div>
+      <div class="field"><label for="oNo">${cn?'Order number':'Order / invoice number'}</label><input id="oNo" value="${esc(o.orderNo||'')}" placeholder="optional"></div>
+      <div class="field"><label for="oDate">Order date</label><input id="oDate" type="date" value="${o.orderDate}"></div>
+      <div class="field"><label for="oExp">${cn?'Est. delivery date':'Expected delivery'}</label><input id="oExp" type="date" value="${o.expectedDate}"></div>
+    </div>
+    ${cn?'':`<div class="fields"><div class="field"><label for="oInc">Prices I'm entering</label><select id="oInc"><option value="0" ${o.pricesIncVat?'':'selected'}>Exclude VAT</option><option value="1" ${o.pricesIncVat?'selected':''}>Include VAT</option></select></div></div>`}
+    <div class="pgrid ${isIn?'rcv':''}"><div class="pg-row pg-head"><span>Item</span><span>${isIn?'Ordered':'Qty'}</span><span>£ each</span>${isIn?'<span>Received</span>':''}<span class="r">Total</span></div>${rows}</div>
+    <span class="hint">Leave qty blank for anything not on this order.${cn?' Split ink litres by colour.':''} Prices fill in from your last ${cn?'China':'UK'} order.</span>
+    <div class="fields">
+      <div class="field"><label for="oOther">Other items, not tracked (£)</label><input id="oOther" type="number" min="0" step="0.01" value="${show(o.otherGoods)}" placeholder="e.g. powder"></div>
+      <div class="field"><label for="oShip">${cn?'Shipping fee (£)':'Delivery charge (£)'}</label><input id="oShip" type="number" min="0" step="0.01" value="${show(o.shipping)}"></div>
+      ${cn?`<div class="field"><label for="oProc">Payment processing fee (£)</label><input id="oProc" type="number" min="0" step="0.01" value="${o.processing||''}"><span class="hint">Under "Payment information"</span></div>`
+          :`<div class="field"><label for="oVat">VAT (£)</label><input id="oVat" type="number" min="0" step="0.01" value="${o.vat||''}"><span class="hint" id="oVatHint"></span></div>`}
+    </div>
+    ${cn && existing ? `<div class="lines">
+      <div class="row spread"><span class="label">Import fees · type · amount · date paid</span><button class="btn sm" id="oAddCh">Add import fee</button></div>
+      <div id="oCharges" class="lines">${o.charges.map(chargeRow).join('')}</div>
+      <label class="row" style="gap:8px"><input type="checkbox" id="oPending" style="width:auto" ${o.feesPending?'checked':''}> Still waiting for import fees on this order</label>
+    </div>` : ''}
+    ${isIn?`<div id="rcvMsg" hidden></div>
+    <div id="rcvShort" class="lines" hidden>
+      <span class="label" id="rcvShortTxt"></span>
+      <label class="row" style="gap:8px"><input type="radio" name="rcvShort" value="chase" style="width:auto" ${existing.status==='partial'||!(existing.shortClosed||[]).length?'checked':''}> Still to come. Flag the order to chase.</label>
+      <label class="row" style="gap:8px"><input type="radio" name="rcvShort" value="close" style="width:auto" ${existing.status!=='partial'&&(existing.shortClosed||[]).length?'checked':''}> Not coming. Close the order short.</label>
+    </div>`:''}
+    <div class="totals" id="oTot"></div>
+    <div class="field"><label for="oNotes">Notes</label><input id="oNotes" value="${esc(o.notes||'')}" placeholder="Tracking number, anything else…"></div>
+    <div class="row spread">${existing && !S.units.some(u=>u.orderId===existing.id) ? `<button class="btn danger" id="oDel">Delete order</button>` : existing ? '<span class="hint">Received orders can’t be deleted. Correct them here instead.</span>' : '<span></span>'}<div class="row"><button class="btn" data-close>Cancel</button><button class="btn primary" id="oSave">${existing?'Save order':'Log order'}</button></div></div>`, ov => {
+    let vatTouched = !!(existing && !o.vatAuto);
+    let expTouched = !!existing;
+    const inc = () => !cn && $('#oInc').value === '1';
+    const read = () => {
+      const div = inc() ? incMul : 1;
+      const lines = productList().map(p=>({productId:p.id, qty:num($('#pq-'+p.id).value), unitPrice:num($('#pp-'+p.id).value)}));
+      lines.forEach(l => { $('#pl-'+l.productId).textContent = l.qty && l.unitPrice ? money(l.qty*l.unitPrice) : ''; });
+      return {
+        lines: lines.filter(l=>l.qty>0).map(l=>({...l, unitPrice:Math.round(l.unitPrice/div*10000)/10000})),
+        otherGoods: Math.round(num($('#oOther').value)/div*100)/100,
+        shipping: Math.round(num($('#oShip').value)/div*100)/100,
+        processing: cn ? num($('#oProc').value) : 0,
+        charges: cn ? (existing ? readCharges(ov).filter(c=>c.amount>0) : o.charges) : [],
+      };
+    };
+    const rcvPlan = () => { const d = read(); return productList().map(p => ({pid:p.id, ord:d.lines.filter(l=>l.productId===p.id).reduce((a,l)=>a+l.qty,0), want:Math.max(0, Math.floor(num($('#pr-'+p.id).value))), have:linked[p.id].have, removable:linked[p.id].removable})); };
+    const updRcv = () => {
+      const plan = rcvPlan(), msgs = []; let blocked = false;
+      plan.forEach(r => { const dl = r.want - r.have, nm = P(r.pid).short;
+        if (dl > 0) msgs.push(`Add ${dl}× ${nm} to stock.`);
+        if (dl < 0){ if (-dl > r.removable.length){ blocked = true; msgs.push(`Only ${r.removable.length}× ${nm} from this order are unopened, so at most ${r.removable.length} can be removed. Write off opened ones on the Stock tab instead.`); } else msgs.push(`Remove ${-dl}× ${nm} from stock (newest unopened first).`); }
+        if (r.want > r.ord){ blocked = true; msgs.push(`${nm}: received (${r.want}) can't be more than ordered (${r.ord}). Correct the ordered quantity or the received quantity to save.`); }
+      });
+      const short = plan.filter(r=>r.want < r.ord);
+      $('#rcvMsg').hidden = !msgs.length; $('#rcvMsg').className = 'alert ' + (blocked?'crit':'warn'); $('#rcvMsg').innerHTML = `<div class="msg">${msgs.map(esc).join('<br>')}</div>`;
+      $('#rcvShort').hidden = !short.length;
+      if (short.length) $('#rcvShortTxt').textContent = 'Not all of it arrived: ' + short.map(r=>`${r.ord-r.want}× ${P(r.pid).short}`).join(', ') + ' missing. Is the rest…';
+      $('#oSave').disabled = blocked;
+    };
+    const recalc = () => {
+      const d = read();
+      let t = orderTotals({...d, vat:0});
+      if (!cn){
+        if (!vatTouched) $('#oVat').value = t.exVat ? (t.exVat*vr/100).toFixed(2) : '';
+        $('#oVatHint').textContent = vatTouched ? 'Entered manually.' : `Auto: ${vr}% of goods + delivery.`;
+        t = orderTotals({...d, vat:num($('#oVat').value)});
+        $('#oTot').innerHTML = `<span>Goods ex VAT</span><span class="num">${money(t.goods)}</span><span>Delivery ex VAT</span><span class="num">${money(t.ship)}</span><span>VAT</span><span class="num">${money(t.vat)}</span><span class="grand">Total paid</span><span class="grand num">${money(t.total)}</span>`;
+      } else {
+        const ship = num(d.shipping), proc = num(d.processing);
+        let html = `<span>Subtotal</span><span class="num">${money(t.goods)}</span><span>Shipping fee</span><span class="num">${money(ship)}</span><span>Order total</span><span class="num">${money(t.goods+ship)}</span><span>Payment processing fee</span><span class="num">${money(proc)}</span><span class="grand">Amount paid</span><span class="grand num">${money(t.goods+ship+proc)}</span><span class="hint" style="grid-column:1/-1">Should match "Amount paid" on the confirmation.</span>`;
+        if (t.duty || t.vat) html += `<span>Import duty &amp; fees</span><span class="num">${money(t.duty)}</span><span>Import VAT</span><span class="num">${money(t.vat)}</span><span class="grand">Total incl. import costs</span><span class="grand num">${money(t.total)}</span>`;
+        $('#oTot').innerHTML = html;
+      }
+      if (isIn) updRcv();
+    };
+    ov.addEventListener('input', e => {
+      if (e.target.id==='oVat') vatTouched = true;
+      if (e.target.id==='oExp') expTouched = true;
+      if (e.target.id==='oDate' && !expTouched) $('#oExp').value = addDays(e.target.value||today(), cn?lead:7);
+      recalc();
+    });
+    ov.addEventListener('change', recalc);
+    if (cn && existing){
+      $('#oAddCh', ov).onclick = () => { const ch = readCharges(ov); ch.push({type: ch.some(c=>c.type==='duty') ? 'vat' : 'duty', amount:0, date:today()}); $('#oCharges').innerHTML = ch.map(chargeRow).join(''); recalc(); };
+      $('#oCharges', ov).addEventListener('click', e => { const b = e.target.closest('[data-crm]'); if (!b) return; const ch = readCharges(ov); ch.splice(+b.dataset.crm,1); $('#oCharges').innerHTML = ch.map(chargeRow).join(''); recalc(); });
+    }
+    recalc();
+    if (existing && $('#oDel', ov)){ let armed=false; $('#oDel', ov).onclick = async e => { if (!armed){ armed=true; e.target.textContent='Tap again to delete'; return; } if (await write(()=>db.collection('orders').doc(existing.id).delete(), 'Order deleted')) closeModal(); }; }
+    $('#oSave', ov).onclick = async () => {
+      const d = read();
+      if (!d.lines.length && !d.otherGoods){ toast('Enter a quantity for at least one item.'); return; }
+      const data = {...d, supplier:$('#oSup').value.trim(), orderNo:$('#oNo').value.trim(), origin, orderDate:$('#oDate').value||today(), expectedDate:$('#oExp').value||addDays(today(), cn?lead:7), duty:0,
+        vat: cn ? 0 : num($('#oVat').value), vatAuto: !vatTouched, pricesIncVat: inc(),
+        feesPending: cn ? (existing ? $('#oPending').checked : true) : false,
+        notes:$('#oNotes').value.trim(), status:o.status||'ordered', receivedDate:o.receivedDate||null};
+      const ref = db.collection('orders').doc(existing ? existing.id : 'o'+uid());
+      const base = existing ? Object.fromEntries(Object.entries(existing).filter(([k])=>k!=='id')) : {};
+      let extra = {}, plan = [];
+      if (isIn){
+        plan = rcvPlan();
+        const mode = (ov.querySelector('input[name=rcvShort]:checked')||{}).value || 'chase';
+        const short = plan.filter(r=>r.want < r.ord);
+        const deliveries = (existing.deliveries && existing.deliveries.length) ? [...existing.deliveries] : [{date:existing.receivedDate||today(), lines:plan.filter(r=>r.have).map(r=>({productId:r.pid, qty:r.have}))}];
+        const delivered = pid => deliveries.reduce((a,dv)=>a+(dv.lines||[]).filter(l=>l.productId===pid).reduce((b,l)=>b+num(l.qty),0),0);
+        const adj = plan.map(r=>({productId:r.pid, qty:r.want - delivered(r.pid)})).filter(l=>l.qty);
+        if (adj.length) deliveries.push({date:today(), adjustment:true, lines:adj});
+        extra = {deliveries, shortClosed: short.length && mode==='close' ? short.map(r=>({productId:r.pid, qty:r.ord-r.want, date:today()})) : [], status: short.length && mode!=='close' ? 'partial' : 'received'};
+      }
+      const full = {...base, ...data, ...extra};
+      const ok = await write(async () => {
+        await ref.set(full);
+        for (const r of plan){
+          const diff = r.want - r.have;
+          if (diff > 0){ const c = landedForProduct(full, r.pid); for (let i=0;i<diff;i++) await db.collection('units').doc('u'+uid()).set({productId:r.pid, receivedDate:existing.receivedDate||today(), status:'stock', costExVat:Math.round(c.exVat*100)/100, vat:Math.round(c.vat*100)/100, orderId:existing.id, created:new Date().toISOString()}); }
+          if (diff < 0){ for (const u of r.removable.slice(0, -diff)) await db.collection('units').doc(u.id).delete(); }
+        }
+        if (cn && data.supplier && data.supplier !== (S.settings.chinaSupplier||'')) await db.collection('settings').doc('main').set({leadDays:lead, vatRate:vr, ...S.settings, chinaSupplier:data.supplier});
+      }, existing ? 'Order saved' : (cn ? 'China order logged. Add import fees when the bill arrives.' : 'UK order logged'));
+      if (ok) closeModal();
+    };
+  });
+}
+
+function openFees(id){
+  const o = S.orders.find(x=>x.id===id); if (!o) return;
+  const charges = (o.charges||[]).slice();
+  if (num(o.duty)) charges.unshift({type:'duty', amount:num(o.duty), date:o.orderDate});
+  const t = orderTotals(o);
+  modal(`<h2>Add import fees</h2>
+    <p style="margin:0">${esc(o.supplier||'Order')} · placed ${fmtDate(o.orderDate)} · goods ${money(t.goods)}</p>
+    ${charges.length?`<div class="tablewrap"><table><thead><tr><th>Already added</th><th>Paid</th><th class="r">Amount</th></tr></thead><tbody>${charges.map(c=>`<tr><td>${esc(CHARGE_TYPES[c.type]||c.type)}</td><td class="num">${fmtDate(c.date)}</td><td class="r num">${money(c.amount)}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <p class="hint" style="margin:0">Add each line from the courier or HMRC bill. Use one row for duty and one for import VAT so VAT stays separate for your VAT return.</p>
+    <div id="fCharges" class="lines">${[{type:'duty'},{type:'vat'}].map((c,i)=>chargeRow({...c, amount:'', date:today()}, i)).join('')}</div>
+    <div><button class="btn sm" id="fAdd">Add another fee</button></div>
+    <label class="row" style="gap:8px"><input type="checkbox" id="fDone" style="width:auto" checked> That's all the import fees for this order</label>
+    <div class="totals" id="fTot"></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="fSave">Save fees</button></div>`, ov => {
+    const recalc = () => { const add = readCharges(ov).filter(c=>c.amount>0); const t2 = orderTotals({...o, charges:[...(o.charges||[]), ...add]}); $('#fTot').innerHTML = `<span>Fees added now</span><span class="num">${money(add.reduce((a,c)=>a+c.amount,0))}</span><span class="grand">New order total</span><span class="grand num">${money(t2.total)}</span>`; };
+    ov.addEventListener('input', recalc); ov.addEventListener('change', recalc);
+    $('#fAdd', ov).onclick = () => { const ch = readCharges(ov); ch.push({type:'handling', amount:0, date:today()}); $('#fCharges').innerHTML = ch.map(chargeRow).join(''); recalc(); };
+    $('#fCharges', ov).addEventListener('click', e => { const b = e.target.closest('[data-crm]'); if (!b) return; const ch = readCharges(ov); ch.splice(+b.dataset.crm,1); $('#fCharges').innerHTML = ch.map(chargeRow).join(''); recalc(); });
+    recalc();
+    $('#fSave', ov).onclick = async () => {
+      const add = readCharges(ov).filter(c=>c.amount>0);
+      const done = $('#fDone').checked;
+      if (!add.length && !done){ toast('Enter an amount, or tick that all fees are in.'); return; }
+      const ok = await write(()=>db.collection('orders').doc(o.id).update({charges:[...charges, ...add], duty:0, feesPending:!done}), add.length ? `Added ${money(add.reduce((a,c)=>a+c.amount,0))} in import fees` : 'Marked all import fees received');
+      if (ok) closeModal();
+    };
+  });
+}
+
+function openReceive(id){
+  const o = S.orders.find(x=>x.id===id); if (!o) return;
+  const rows = orderPids(o).map(pid => ({pid, ord:orderedQty(o,pid), got:receivedQty(o,pid), out:outstanding(o,pid)})).filter(r=>r.out>0);
+  const first = !(o.deliveries||[]).length;
+  modal(`<h2>${first?'Receive order':'Receive rest of order'}</h2>
+    <p style="margin:0">${esc(o.supplier||'Order')}${o.orderNo?' #'+esc(o.orderNo):''} · placed ${fmtDate(o.orderDate)}</p>
+    <p class="hint" style="margin:0">Count what actually arrived. If anything's missing, enter the lower number. The order stays flagged as a part delivery so you can chase the rest.</p>
+    <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Ordered</th><th class="r">Already in</th><th class="r">Arrived now</th><th class="r">Cost each so far</th></tr></thead><tbody>${rows.map(r=>`<tr><td><span class="prod"><span class="dot" style="background:${P(r.pid).color}"></span>${esc(P(r.pid).short)}</span></td><td class="r num">${r.ord}</td><td class="r num">${r.got||'—'}</td><td class="r"><input type="number" min="0" max="${r.out}" id="rq-${r.pid}" value="${r.out}" style="width:80px" aria-label="${esc(P(r.pid).short)} arrived now"></td><td class="r num">${money(landedForProduct(o,r.pid).exVat)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="fields"><div class="field"><label for="rcDate">Date received (mark this on the items)</label><input id="rcDate" type="date" value="${today()}"></div></div>
+    <div id="rcShort" class="alert warn" hidden><div class="msg"></div></div>
+    <label class="row" style="gap:8px" id="rcCloseWrap" hidden><input type="checkbox" id="rcClose" style="width:auto"> The rest isn't coming. Close the order and don't flag it.</label>
+    ${isChina(o)&&o.feesPending?'<p class="hint" style="margin:0">Import fees aren\'t in yet. When you add them, these item costs update automatically.</p>':''}
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="rcSave">Add to stock</button></div>`, ov => {
+    const read = () => rows.map(r=>({productId:r.pid, out:r.out, qty:Math.max(0, Math.min(r.out, Math.floor(num($('#rq-'+r.pid).value))))}));
+    const upd = () => {
+      const rd = read(), n = rd.reduce((a,l)=>a+l.qty,0), short = rd.filter(l=>l.qty<l.out);
+      $('#rcShort').hidden = !short.length; $('#rcCloseWrap').hidden = !short.length;
+      const close = short.length && $('#rcClose').checked;
+      if (short.length) $('#rcShort .msg').innerHTML = close ? `<b>Closing short.</b> ${esc(short.map(l=>`${l.out-l.qty}× ${P(l.productId).short}`).join(', '))} won't be counted as on order. What you paid is spread over the items that did arrive.` : `<b>Part delivery.</b> Still to come: ${esc(short.map(l=>`${l.out-l.qty}× ${P(l.productId).short}`).join(', '))}. The order will be flagged in Received so you can chase it.`;
+      $('#rcSave').textContent = n ? `Add ${n} item${n>1?'s':''} to stock` : (close ? 'Close order' : 'Save');
+    };
+    ov.addEventListener('input', upd); ov.addEventListener('change', upd); upd();
+    $('#rcSave', ov).onclick = async e => {
+      const rd = read(), n = rd.reduce((a,l)=>a+l.qty,0), short = rd.filter(l=>l.qty<l.out);
+      const close = short.length > 0 && $('#rcClose').checked;
+      if (!n && !close){ toast('Enter what arrived, or tick that the rest isn’t coming.'); return; }
+      e.target.disabled = true;
+      const d = $('#rcDate').value || today();
+      const deliveries = [...(o.deliveries||[])];
+      if (n) deliveries.push({date:d, lines:rd.filter(l=>l.qty>0).map(l=>({productId:l.productId, qty:l.qty}))});
+      const shortClosed = [...(o.shortClosed||[]), ...(close ? short.map(l=>({productId:l.productId, qty:l.out-l.qty, date:d})) : [])];
+      const complete = !short.length || close;
+      const tmp = {...o, shortClosed};
+      const ok = await write(async () => {
+        for (const l of rd){ if (!l.qty) continue; const c = landedForProduct(tmp, l.productId);
+          for (let i=0;i<l.qty;i++) await db.collection('units').doc('u'+uid()).set({productId:l.productId, receivedDate:d, status:'stock', costExVat:Math.round(c.exVat*100)/100, vat:Math.round(c.vat*100)/100, orderId:o.id, created:new Date().toISOString()}); }
+        await db.collection('orders').doc(o.id).update({status: complete?'received':'partial', receivedDate:d, firstReceivedDate:o.firstReceivedDate||d, deliveries, shortClosed});
+      }, complete ? (n ? `${n} items added to stock. Order complete.` : 'Order closed') : `${n} items added. Order flagged as part delivered.`);
+      if (ok) closeModal(); else e.target.disabled = false;
+    };
+  });
+}
+
+function openChase(id){
+  const o = S.orders.find(x=>x.id===id); if (!o) return;
+  const ch = o.chases || [];
+  modal(`<h2>Log a chase</h2>
+    <p style="margin:0">${esc(o.supplier||'Order')}${o.orderNo?' #'+esc(o.orderNo):''} · still to come: <b>${esc(outstandingText(o))}</b></p>
+    ${ch.length?`<div class="tablewrap"><table><thead><tr><th>Chased</th><th>Note</th></tr></thead><tbody>${ch.slice().reverse().map(c=>`<tr><td class="num">${fmtDate(c.date)}</td><td style="white-space:normal">${esc(c.note||'')}</td></tr>`).join('')}</tbody></table></div>`:''}
+    <div class="fields">
+      <div class="field" style="flex:0 1 170px"><label for="chDate">Date</label><input id="chDate" type="date" value="${today()}"></div>
+      <div class="field" style="flex:1 1 260px"><label for="chNote">What happened</label><input id="chNote" placeholder="e.g. Messaged supplier, resending 4 rolls"></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="chSave">Save chase</button></div>`, ov => {
+    $('#chSave', ov).onclick = async () => {
+      const entry = {date:$('#chDate').value||today(), note:$('#chNote').value.trim()};
+      if (await write(()=>db.collection('orders').doc(o.id).update({chases:[...ch, entry]}), 'Chase logged')) closeModal();
+    };
+  });
+}
+
+async function saveSettings(){
+  if (!mgrOk()){ toast('Settings are locked. Enter the management PIN.'); render(); return false; }
+  const ok = await write(async () => {
+    await db.collection('settings').doc('main').set({leadDays:Math.max(1,num($('#setLead').value)||90), vatRate:num($('#setVat').value), chinaSupplier:$('#setSup').value.trim()});
+    for (const p of productList()){
+      const minStock = Math.max(0, Math.floor(num($(`[data-min="${p.id}"]`).value)));
+      const estDays = p.estDays || null;
+      const shelfDays = Math.floor(num($(`[data-shelf="${p.id}"]`).value)) || 180;
+      const maxOpenDays = Math.floor(num($(`[data-maxopen="${p.id}"]`).value)) || null;
+      if (minStock !== p.minStock || (estDays||null) !== (p.estDays||null) || shelfDays !== (p.shelfDays||180) || maxOpenDays !== (p.maxOpenDays||null)){
+        const base = {...p}; delete base.id;
+        await db.collection('products').doc(p.id).set({...base, minStock, estDays, shelfDays, maxOpenDays});
+      }
+    }
+  }, 'Settings saved');
+  return ok;
+}
+
+// ---------- events ----------
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act],[data-filter],[data-ufilter],[data-oorigin],[data-pexp],[data-jump],[data-showfin]');
+  if (!b || b.closest('#modalRoot') && !b.dataset.act) return;
+  if (b.dataset.filter){ S.stockFilter = b.dataset.filter; render(); return; }
+  if (b.dataset.jump){ const el = document.getElementById('p-'+b.dataset.jump); if (el) el.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}); return; }
+  if (b.dataset.showfin){ const k = b.dataset.showfin; S.showAllFin.has(k) ? S.showAllFin.delete(k) : S.showAllFin.add(k); render(); return; }
+  if (b.dataset.pexp){ const k = b.dataset.pexp; S.priceOpen.has(k) ? S.priceOpen.delete(k) : S.priceOpen.add(k); render(); return; }
+  if (b.dataset.oorigin){ S.orderFilter.origin = b.dataset.oorigin; render(); return; }
+  if (b.dataset.ufilter){ S.usageFilter = b.dataset.ufilter; render(); return; }
+  const id = b.dataset.id;
+  switch (b.dataset.act){
+    case 'goOrders': return setTab('orders');
+    case 'open': return openUseUnit(id);
+    case 'finish': return openFinish(id);
+    case 'newChina': return openOrder(null,'china');
+    case 'newUK': return openOrder(null,'uk');
+    case 'editOrder': return openOrder(id);
+    case 'receive': return openReceive(id);
+    case 'fees': return openFees(id);
+    case 'chase': return openChase(id);
+    case 'writeoff': return openWriteOff(id);
+    case 'saveSettings': return saveSettings();
+    case 'lockMgr': mgrUntil = 0; render(); return;
+    case 'unlockMgr': return (async () => { const ok = await checkPin($('#setPin').value); if (ok){ render(); toast('Settings unlocked for 10 minutes'); } else { $('#pinErr').textContent = 'Wrong PIN'; $('#setPin').value=''; $('#setPin').focus(); } })();
+  }
+});
+
+document.addEventListener('change', e => {
+  if (e.target.id==='ofYear'){ S.orderFilter.year = e.target.value; render(); }
+  if (e.target.id==='perPreset'){ const r = periodRange(); S.period = {preset:e.target.value, from:S.period.from||r[0], to:S.period.to||r[1]}; if (e.target.value==='custom'){ S.period.from = r[0]; S.period.to = r[1]; } savePeriod(); render(); }
+  if (e.target.id==='perFrom' && e.target.value){ S.period.from = e.target.value; savePeriod(); render(); }
+  if (e.target.id==='perTo' && e.target.value){ S.period.to = e.target.value; savePeriod(); render(); }
+});
+function savePeriod(){ try { localStorage.setItem('dtf-period', JSON.stringify(S.period)); } catch(e) {} }
+try { const p = JSON.parse(localStorage.getItem('dtf-period')||'null'); if (p && p.preset) S.period = p; } catch(e) {}
+document.addEventListener('input', e => {
+  if (e.target.id!=='ofQ') return;
+  S.orderFilter.q = e.target.value; const pos = e.target.selectionStart;
+  render(); const q = $('#ofQ'); if (q){ q.focus(); try { q.setSelectionRange(pos,pos); } catch(_){} }
+});
+
+// ---------- data ----------
+
+// ---------- Supabase storage (same calls the page used before) ----------
+const TABLES = {products:'dtf_products', units:'dtf_units', orders:'dtf_orders', settings:'dtf_settings'};
+function makeDb(client){
+  const listeners = {}, cache = {}, timers = {}, channels = {};
+  const emit = name => {
+    const docs = [...(cache[name] || new Map()).entries()].map(([id, d]) => ({id, exists:true, data:() => d}));
+    (listeners[name] || new Set()).forEach(fn => { try { fn({docs, size:docs.length, empty:!docs.length}); } catch(e){ console.error(e); } });
+  };
+  const load = async name => {
+    const rows = []; let from = 0;
+    for (;;){
+      const {data, error} = await client.from(TABLES[name]).select('id,data').range(from, from + 999);
+      if (error) throw error;
+      rows.push(...data); if (data.length < 1000) break; from += 1000;
+    }
+    cache[name] = new Map(rows.map(r => [r.id, r.data])); emit(name);
+  };
+  const reload = name => { clearTimeout(timers[name]); timers[name] = setTimeout(() => load(name).catch(console.error), 300); };
+  const fail = error => { console.error(error); throw {code: error && error.code === '42501' ? 'invalid_argument' : 'unavailable', message: error && error.message}; };
+  return {
+    collection(name){
+      const table = TABLES[name];
+      return {
+        doc(id){
+          return {
+            async set(data){ const {error} = await client.from(table).upsert({id, data}); if (error) fail(error); (cache[name] ||= new Map()).set(id, data); emit(name); },
+            async update(patch){
+              let base = cache[name] && cache[name].get(id);
+              if (!base){ const r = await client.from(table).select('data').eq('id', id).maybeSingle(); if (r.error) fail(r.error); base = r.data && r.data.data; }
+              if (!base) throw {code:'invalid_argument', message:'Record not found'};
+              const data = {...base, ...patch};
+              const {error} = await client.from(table).update({data}).eq('id', id); if (error) fail(error);
+              (cache[name] ||= new Map()).set(id, data); emit(name);
+            },
+            async delete(){ const {error} = await client.from(table).delete().eq('id', id); if (error) fail(error); cache[name] && cache[name].delete(id); emit(name); }
+          };
+        },
+        onSnapshot(next, onErr){
+          (listeners[name] ||= new Set()).add(next);
+          load(name).catch(e => { console.error(e); onErr && onErr(e); });
+          if (!channels[name]) channels[name] = client.channel('rt-' + table).on('postgres_changes', {event:'*', schema:'public', table}, () => reload(name)).subscribe();
+          return () => listeners[name].delete(next);
+        }
+      };
+    }
+  };
+}
+const sb = (window.supabase && SUPABASE_URL.startsWith('http')) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+async function start(){
+  S.ready = false; render();
+  db = makeDb(sb);
+  const got = {};
+  const done = k => { got[k] = true; if (got.p && got.u && got.o && got.s) S.ready = true; render(); };
+  setTimeout(() => { if (!S.ready){ S.ready = true; render(); } }, 6000);
+  const onErr = () => { S.ready = true; S.notice = 'Some records couldn’t load. Check your connection and reload the page.'; render(); };
+  db.collection('products').onSnapshot(snap => { const m = {}; snap.docs.forEach(d=>{ m[d.id] = {id:d.id, ...d.data()}; }); S.products = m; done('p'); }, onErr);
+  db.collection('units').onSnapshot(snap => { S.units = snap.docs.map(d=>({id:d.id, ...d.data()})); done('u'); }, onErr);
+  db.collection('orders').onSnapshot(snap => { S.orders = snap.docs.map(d=>({id:d.id, ...d.data()})); done('o'); }, onErr);
+  db.collection('settings').onSnapshot(snap => { const d = snap.docs.find(x=>x.id==='main'); if (d) S.settings = {leadDays:90, vatRate:20, ...d.data()}; done('s'); }, onErr);
+}
+
+// ---------- sign in ----------
+const showLogin = on => { $('#login').hidden = !on; $('#signOut').hidden = on; };
+const toEmail = u => { u = u.trim().toLowerCase(); return u.includes('@') ? u : u + '@' + USERNAME_DOMAIN; };
+let started = false;
+function enter(session){
+  showLogin(false);
+  const em = (session.user && session.user.email) || '';
+  $('#whoami').textContent = em.endsWith('@' + USERNAME_DOMAIN) ? em.split('@')[0] : em;
+  if (!started){ started = true; start(); }
+}
+async function boot(){
+  if (!sb){ S.ready = true; S.notice = 'Not connected: add your Supabase project URL and key at the top of index.html.'; render(); return; }
+  $('#loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('#lgBtn'); btn.disabled = true; btn.textContent = 'Signing in…'; $('#lgErr').hidden = true;
+    const {data, error} = await sb.auth.signInWithPassword({email: toEmail($('#lgUser').value), password: $('#lgPass').value});
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (error){ $('#lgErr').hidden = false; $('#lgErr .msg').textContent = 'Wrong username or password.'; $('#lgPass').value = ''; return; }
+    enter(data.session);
+  });
+  $('#signOut').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+  sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT') location.reload(); });
+  const {data} = await sb.auth.getSession();
+  if (data.session) enter(data.session); else { showLogin(true); $('#lgUser').focus(); }
+}
+boot();
+})();
+</script>
+</body>
+</html>
